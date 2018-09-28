@@ -86,8 +86,6 @@ Answers:
 ```{bash, eval=T}
 ./global_alignment.py sequences/seq1.fasta sequences/seq2.fasta score_matrix -l 5
 ```
- 
-optimal alignment score: 231.0
 
 ```{bash, eval=T}
 ./global_alignment.py sequences/seq1.fasta sequences/seq2.fasta score_matrix -l 5 -o
