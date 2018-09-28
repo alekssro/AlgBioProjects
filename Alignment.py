@@ -63,36 +63,40 @@ class Alignment:
         self.D = self.initMatrix(len(self.seq1) + 1, len(self.seq2) + 1, value=0)
         self.Ins = self.initMatrix(len(self.seq1) + 1, len(self.seq2) + 1, value=0)
 
+        self.T[0][0] = 0
         # Rest of the matrix
         for j in range(0, len(self.T[0])):
-
-            for i in range(0, len(self.T)):
+            for i in range(1, len(self.T)):
                 v1 = v2 = v3 = float("inf")
-                if (i == 0) and (j == 0):
-                    self.T[i][j] = 0
-                    break
-                if (i > 0) and (j >= 0):    # Vertical arrow
-                    d1, d2 = float("inf"), float("inf")
-                    d1 = self.T[i-1][j] + self.gapcost(1)
-                    if (i > 1) and (j >= 0):
-                        d2 = self.D[i-1][j] + self.gapcost(0)
-                    self.D[i][j] = min(d1, d2)
-                    v2 = self.D[i][j]
-                if (i >= 0) and (j > 0):    # Horizontal arrow
-                    i1, i2 = float("inf"), float("inf")
-                    i1 = self.T[i][j-1] + self.gapcost(1)
-                    if (i >= 0) and (j > 1):
-                        i2 = self.Ins[i][j-1] + self.gapcost(0)
-                    self.Ins[i][j] = min(i1, i2)
-                    v3 = self.Ins[i][j]
+
                 if (i > 0) and (j > 0):     # Diagonal arrow
                     v1 = self.T[i-1][j-1] + self.N[int(self.A[i-1])][int(self.B[j-1])]
+                if (i > 0) and (j >= 0):    # Vertical arrow
+                    v2 = self.calcD(i, j)
+                if (i >= 0) and (j > 0):    # Horizontal arrow
+                    v3 = self.calcI(i, j)
 
                 self.T[i][j] = min(v1, v2, v3)
 
         self.score = self.T[i][j]
 
         return self.T[i][j]
+
+    def calcD(self, i, j):
+        d1 = d2 = float("inf")
+        d1 = self.T[i-1][j] + self.gapcost(1)
+        if (i > 1) and (j >= 0):
+            d2 = self.D[i-1][j] + self.gapcost(0)
+        self.D[i][j] = min(d1, d2)
+        return self.D[i][j]
+
+    def calcI(self, i, j):
+        i1 = i2 = float("inf")
+        i1 = self.T[i][j-1] + self.gapcost(1)
+        if (i >= 0) and (j > 1):
+            i2 = self.Ins[i][j-1] + self.gapcost(0)
+        self.Ins[i][j] = min(i1, i2)
+        return self.Ins[i][j]
 
     def backtrack_iterative(self):
 
@@ -129,6 +133,7 @@ class Alignment:
     def align(self):
 
         self.affine_align()
+        # print(self.T)
         self.backtrack_iterative()
         self.a = self.num_to_sequence(self.a)
         self.b = self.num_to_sequence(self.b)

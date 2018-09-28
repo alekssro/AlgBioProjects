@@ -61,3 +61,37 @@ def RecurBackTrack(self, i, j, k=-5):
         self.RecurBackTrack(i, j-1)
 
     return self.a, self.b
+
+def affine_align(self):
+    """Global alignment with affine or linear penalties. We assume we are minimizing."""
+    self.D = self.initMatrix(len(self.seq1) + 1, len(self.seq2) + 1, value=0)
+    self.Ins = self.initMatrix(len(self.seq1) + 1, len(self.seq2) + 1, value=0)
+
+    self.T[0][0] = 0
+    # Rest of the matrix
+    for j in range(0, len(self.T[0])):
+        for i in range(1, len(self.T)):
+            v1 = v2 = v3 = float("inf")
+
+            if (i > 0) and (j > 0):     # Diagonal arrow
+                v1 = self.T[i-1][j-1] + self.N[int(self.A[i-1])][int(self.B[j-1])]
+            if (i > 0) and (j >= 0):    # Vertical arrow
+                d1 = d2 = float("inf")
+                d1 = self.T[i-1][j] + self.gapcost(1)
+                if (i > 1) and (j >= 0):
+                    d2 = self.D[i-1][j] + self.gapcost(0)
+                self.D[i][j] = min(d1, d2)
+                v2 = self.D[i][j]
+            if (i >= 0) and (j > 0):    # Horizontal arrow
+                i1 = i2 = float("inf")
+                i1 = self.T[i][j-1] + self.gapcost(1)
+                if (i >= 0) and (j > 1):
+                    i2 = self.Ins[i][j-1] + self.gapcost(0)
+                self.Ins[i][j] = min(i1, i2)
+                v3 = self.Ins[i][j]
+
+            self.T[i][j] = min(v1, v2, v3)
+
+    self.score = self.T[i][j]
+
+    return self.T[i][j]
