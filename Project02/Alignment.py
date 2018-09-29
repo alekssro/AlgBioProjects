@@ -133,7 +133,6 @@ class Alignment:
     def align(self):
 
         self.affine_align()
-        # print(self.T)
         self.backtrack_iterative()
         self.a = self.num_to_sequence(self.a)
         self.b = self.num_to_sequence(self.b)
