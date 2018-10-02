@@ -82,7 +82,8 @@ class Alignment:
         return self.T[i][j]
 
     def multiple_align(self):
-        self.centerStr = self.findCenterStr()
+        self.centerStr = self.findCenterStr()       # index for the center string
+        self.M = self.initMatrix(2, len(self.seqs_Nums[self.centerStr]))
         optAlign = []
         for i in range(len(self.seqs_Nums)):
             if i == self.centerStr:
@@ -90,11 +91,9 @@ class Alignment:
 
             self.affine_align(self.seqs_Nums[self.centerStr], self.seqs_Nums[i])
             optAlign = self.backtrack_iterative()
-            print(optAlign)
-            break
             self.extendM(optAlign)
 
-        return(optAlign)
+        return(self.M)
 
     def extendM(self, optAlign):
         pass
