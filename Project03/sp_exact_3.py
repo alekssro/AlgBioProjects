@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# Usage: ./sp_exact_3.py score_matrix 5 test.fa
+
 
 from Alignment import Alignment
 from Alignment import GetArguments
@@ -6,8 +8,11 @@ import sys
 
 arguments = GetArguments(sys.argv)
 test = Alignment(arguments.seqs, arguments.score_matrix, arguments.gapcost)
-print(test.sp_exact_3())
-print(test.multiple_align())
+alignm = test.multiple_align()
+
+for i in range(len(alignm)):
+    print(test.num_to_sequence(alignm[i]))
+
 # for x in range(len(test.T)):
 #     print(test.T[x])
 # print(test.T)

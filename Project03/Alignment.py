@@ -55,62 +55,24 @@ class Alignment:
         elif self.alignType == "-a" or self.alignType == "-l":
             return self.gap_params[0] * k + self.gap_params[1]
 
-    def affine_align(self, seq1, seq2):
-        """Global alignment with affine or linear penalties. We assume we are minimizing."""
-        self.D = self.initMatrix(len(seq1) + 1, len(seq2) + 1)
-        self.Ins = self.initMatrix(len(seq1) + 1, len(seq2) + 1)
-        self.T = self.initMatrix(rows=len(seq1) + 1, columns=len(seq2) + 1)
-        self.A, self.B = seq1, seq2
+    def subCost(self, X, Y, i, j):
+        return self.N[int(X[i-1])][int(Y[j-1])]
 
-        self.T[0][0] = 0
-        # Rest of the matrix
-        for j in range(0, len(self.T[0])):
-            for i in range(1, len(self.T)):
-                v1 = v2 = v3 = float("inf")
+    def calcD(self, i, j):
+        d1 = d2 = float("inf")
+        d1 = self.T[i-1][j] + self.gapcost(1)
+        if (i > 1) and (j >= 0):
+            d2 = self.D[i-1][j] + self.gapcost(0)
+        self.D[i][j] = min(d1, d2)
+        return self.D[i][j]
 
-                if (i > 0) and (j > 0):     # Diagonal arrow
-                    v1 = self.T[i-1][j-1] + self.N[int(self.A[i-1])][int(self.B[j-1])]
-                if (i > 0) and (j >= 0):    # Vertical arrow
-                    v2 = self.calcD(i, j)
-                if (i >= 0) and (j > 0):    # Horizontal arrow
-                    v3 = self.calcI(i, j)
-
-                self.T[i][j] = min(v1, v2, v3)
-
-        self.score = self.T[i][j]
-
-        return self.T[i][j]
-
-    def multiple_align(self):
-        self.centerStr = self.findCenterStr()       # index for the center string
-        self.M = self.initMatrix(2, len(self.seqs_Nums[self.centerStr]))
-        optAlign = []
-        for i in range(len(self.seqs_Nums)):
-            if i == self.centerStr:
-                continue
-
-            self.affine_align(self.seqs_Nums[self.centerStr], self.seqs_Nums[i])
-            optAlign = self.backtrack_iterative()
-            self.extendM(optAlign)
-
-        return(self.M)
-
-    def extendM(self, optAlign):
-        pass
-
-    def findCenterStr(self):
-        sumOfScores = float("inf")
-        centerStr = 0
-        scores = self.initMatrix(len(self.seqs_Nums), len(self.seqs_Nums), 0)
-        for i in range(len(self.seqs_Nums)):
-            for j in range(len(self.seqs_Nums)):
-                scores[i][j] = self.affine_align(self.seqs_Nums[i], self.seqs_Nums[j])
-
-            if sum(scores[i]) < sumOfScores:
-                sumOfScores = sum(scores[i])
-                centerStr = i
-
-        return centerStr
+    def calcI(self, i, j):
+        i1 = i2 = float("inf")
+        i1 = self.T[i][j-1] + self.gapcost(1)
+        if (i >= 0) and (j > 1):
+            i2 = self.Ins[i][j-1] + self.gapcost(0)
+        self.Ins[i][j] = min(i1, i2)
+        return self.Ins[i][j]
 
     # Returns the sp-score of the MSA stored in the FASTA file 'filename'
     ###########################################################################
@@ -130,6 +92,60 @@ class Alignment:
                     score = score + self.N[self.seqs_Nums[i][k]][self.seqs_Nums[j][k]]
 
         return score
+
+    def findCenterStr(self):
+        sumOfScores = float("inf")
+        centerStr = 0
+        scores = self.initMatrix(len(self.seqs_Nums), len(self.seqs_Nums), 0)
+        for i in range(len(self.seqs_Nums)):
+            for j in range(len(self.seqs_Nums)):
+                scores[i][j] = self.affine_align(self.seqs_Nums[i], self.seqs_Nums[j])
+
+            if sum(scores[i]) < sumOfScores:
+                sumOfScores = sum(scores[i])
+                centerStr = i
+
+        return centerStr
+
+    def extendM(self, optAlign):
+
+        if not self.M:
+            self.M = optAlign   # first optimal alignment = M (initialize)
+            return
+
+        i = 0
+        while self.M[0] != optAlign[0]:
+
+            if self.M[0][i] == "-":
+                optAlign[0] = optAlign[0][:i] + '-' + optAlign[0][i:]
+                optAlign[1] = optAlign[1][:i] + '-' + optAlign[1][i:]
+            elif optAlign[0][i] == "-":
+                for j in range(len(self.M)):
+                    self.M[j] = self.M[j][:i] + "-" + self.M[j][i:]
+
+            i += 1
+
+            if i >= len(self.M[0]):
+                break
+            if i >= len(optAlign[0]):
+                break
+
+        self.M.append(optAlign[1])
+
+    def multiple_align(self):
+        self.centerStr = self.findCenterStr()       # index for the center string
+        self.M = None
+        # self.M = self.initMatrix(2, len(self.seqs_Nums[self.centerStr]))
+        optAlign = []
+        for i in range(len(self.seqs_Nums)):
+            if i == self.centerStr:
+                continue
+
+            self.affine_align(self.seqs_Nums[self.centerStr], self.seqs_Nums[i])
+            optAlign = self.backtrack_iterative()
+            self.extendM(optAlign)
+
+        return(self.M)
 
     def sp_exact_3(self):
 
@@ -164,24 +180,105 @@ class Alignment:
 
         return self.T[i][j][k]
 
-    def subCost(self, X, Y, i, j):
-        return self.N[int(X[i-1])][int(Y[j-1])]
+    def backtrack_msa_exact(self):
 
-    def calcD(self, i, j):
-        d1 = d2 = float("inf")
-        d1 = self.T[i-1][j] + self.gapcost(1)
-        if (i > 1) and (j >= 0):
-            d2 = self.D[i-1][j] + self.gapcost(0)
-        self.D[i][j] = min(d1, d2)
-        return self.D[i][j]
+        A = self.seqs_Nums[0]
+        B = self.seqs_Nums[1]
+        C = self.seqs_Nums[2]
+        a = b = c = ''
+        i = len(self.T) - 1
+        j = len(self.T[0]) - 1
+        k = len(self.T[0][0]) - 1
+        while (i > 0 or j > 0 or k > 0):
 
-    def calcI(self, i, j):
-        i1 = i2 = float("inf")
-        i1 = self.T[i][j-1] + self.gapcost(1)
-        if (i >= 0) and (j > 1):
-            i2 = self.Ins[i][j-1] + self.gapcost(0)
-        self.Ins[i][j] = min(i1, i2)
-        return self.Ins[i][j]
+            if (i > 0 and j > 0 and k > 0) and (self.T[i][j][k] == self.T[i-1][j-1][k-1] +
+                    self.subCost(A, B, i, j) + self.subCost(B, C, j, k) + self.subCost(A, C, i, k)):
+                # No GAPS
+                a = A[i-1] + a
+                b = B[j-1] + b
+                c = C[k-1] + c
+                i -= 1
+                j -= 1
+                k -= 1
+            elif (i > 0 and j > 0 and k >= 0) and (self.T[i][j][k] == self.T[i-1][j-1][k] +
+                    self.subCost(A, B, i, j) + self.gapcost(0) + self.gapcost(0)):
+                # Gap in C
+                a = A[i-1] + a
+                b = B[j-1] + b
+                c = ("-") + c
+                i -= 1
+                j -= 1
+
+            elif (i>0 and j>=0 and k>0) and (self.T[i][j][k] == self.T[i-1][j][k-1] + self.gapcost(0) +
+                    self.subCost(A, C, i, k) + self.gapcost(0)):
+                # Gap in B
+                a = A[i-1] + a
+                b = ("-") + b
+                c = C[k-1] + c
+                i -= 1
+                k -= 1
+
+            elif (i>=0 and j>0 and k>0) and (self.T[i][j][k] == self.T[i][j-1][k-1] + self.gapcost(0) +
+                    self.gapcost(0) + self.subCost(B, C, j, k)):
+                # Gap in A
+                a = ("-") + a
+                b = B[j-1] + b
+                c = C[k-1] + c
+                j -= 1
+                k -= 1
+
+            elif(i > 0 and j >= 0 and k >= 0) and (self.T[i][j][k] == self.T[i-1][j][k] +
+                    self.gapcost(0) + self.gapcost(0)):
+                # Gap in B and C
+                a = A[i-1] + a
+                b = ("-") + b
+                c = ("-") + c
+                i -= 1
+
+            elif(i>=0 and j>0 and k>=0) and (self.T[i][j][k] == self.T[i][j-1][k] +
+                    self.gapcost(0) + self.gapcost(0)):
+
+                # Gap in A and C
+                a = ("-") + a
+                b = B[i-1] + b
+                c = ("-") + c
+                j -= 1
+
+            elif(i >= 0 and j >= 0 and k > 0) and (self.T[i][j][k] == self.T[i][j][k-1] +
+                    self.gapcost(0) + self.gapcost(0)):
+                # Gap in A and B
+                a = ("-") + a
+                b = ("-") + b
+                c = C[k-1] + c
+                k -= 1
+
+        return a, b, c
+
+    def affine_align(self, seq1, seq2):
+        """Global alignment with affine or linear penalties. We assume we are minimizing."""
+        self.D = self.initMatrix(len(seq1) + 1, len(seq2) + 1)
+        self.Ins = self.initMatrix(len(seq1) + 1, len(seq2) + 1)
+        self.T = self.initMatrix(rows=len(seq1) + 1, columns=len(seq2) + 1)
+        self.A, self.B = seq1, seq2
+
+        self.T[0][0] = 0
+        # Rest of the matrix
+        for j in range(0, len(self.T[0])):
+            for i in range(1, len(self.T)):
+                v1 = v2 = v3 = float("inf")
+
+                if (i > 0) and (j > 0):     # Diagonal arrow
+                    v1 = self.T[i-1][j-1] + self.N[int(self.A[i-1])][int(self.B[j-1])]
+                if (i > 0) and (j >= 0):    # Vertical arrow
+                    v2 = self.calcD(i, j)
+                if (i >= 0) and (j > 0):    # Horizontal arrow
+                    v3 = self.calcI(i, j)
+
+                self.T[i][j] = min(v1, v2, v3)
+
+        self.score = self.T[i][j]
+
+        return self.T[i][j]
 
     def backtrack_iterative(self):
 
@@ -216,14 +313,16 @@ class Alignment:
                     else:
                         k = k + 1
 
-        return a, b
+        return [a, b]
 
     def align(self):
 
-        self.sp_exact_3()
+        self.score = self.sp_exact_3()
+        self.a, self.b, self.c = self.backtrack_msa_exact()
         # self.backtrack_iterative()
         self.a = self.num_to_sequence(self.a)
         self.b = self.num_to_sequence(self.b)
+        self.c = self.num_to_sequence(self.c)
 
 class GetArguments:
 
