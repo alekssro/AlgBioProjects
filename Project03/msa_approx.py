@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # Usage: ./sp_exact_3.py score_matrix 5 test.fa
 
-
 from Alignment import Alignment
 from Alignment import GetArguments
 import sys
@@ -11,7 +10,7 @@ test = Alignment(arguments.seqs, arguments.score_matrix, arguments.gapcost)
 alignm = test.multiple_align()
 
 for i in range(len(alignm)):
-    print(test.num_to_sequence(alignm[i]))
+    print("> ", arguments.heads[i], "\n", test.num_to_sequence(alignm[i]), "\n", sep="")
 
 # for x in range(len(test.T)):
 #     print(test.T[x])

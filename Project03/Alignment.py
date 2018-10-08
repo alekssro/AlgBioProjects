@@ -77,19 +77,17 @@ class Alignment:
     # Returns the sp-score of the MSA stored in the FASTA file 'filename'
     ###########################################################################
     def compute_sp_score(self):
-        # # Read FASTA file and convert input strings to sequences
-        # row = []
-        # for s in read_fasta(filename):
-        #     row.append(str2seq(s))
+
         # Compute the score of each induced pairwise alignment
         score = 0
-        for i in range(len(self.seqs_Nums)):
-            for j in range(i+1, len(self.seqs_Nums)):
-                if len(self.seqs_Nums[i]) != len(self.seqs_Nums[j]):
+        for i in range(len(self.M)):
+            for j in range(i+1, len(self.M)):
+                if len(self.M[i]) != len(self.M[j]):
                     print("ERROR: Rows", i, "and", j, "have different lengths.")
                     sys.exit(1)
-                for k in range(len(self.seqs_Nums[i])):
-                    score = score + self.N[self.seqs_Nums[i][k]][self.seqs_Nums[j][k]]
+                for k in range(len(self.M[i])):
+                    print(self.M[i][k], self.M[j][k])
+                    score = score + self.N[self.M[i][k]][self.M[j][k]]
 
         return score
 
@@ -99,7 +97,8 @@ class Alignment:
         scores = self.initMatrix(len(self.seqs_Nums), len(self.seqs_Nums), 0)
         for i in range(len(self.seqs_Nums)):
             for j in range(len(self.seqs_Nums)):
-                scores[i][j] = self.affine_align(self.seqs_Nums[i], self.seqs_Nums[j])
+                if i != j:
+                    scores[i][j] = self.affine_align(self.seqs_Nums[i], self.seqs_Nums[j])
 
             if sum(scores[i]) < sumOfScores:
                 sumOfScores = sum(scores[i])
@@ -114,21 +113,21 @@ class Alignment:
             return
 
         i = 0
-        while True:
+        while self.M[0] != optAlign[0]:
 
-            if self.M[0][i] == "-":
-                optAlign[0] = optAlign[0][:i] + '-' + optAlign[0][i:]
-                optAlign[1] = optAlign[1][:i] + '-' + optAlign[1][i:]
+            if i < len(self.M[0]):
+
+                if self.M[0][i] == "-":
+                    optAlign[0] = optAlign[0][:i] + '-' + optAlign[0][i:]
+                    optAlign[1] = optAlign[1][:i] + '-' + optAlign[1][i:]
+                elif optAlign[0][i] == "-":
+                    for j in range(len(self.M)):
+                        self.M[j] = self.M[j][:i] + "-" + self.M[j][i:]
+
+                i += 1
             elif optAlign[0][i] == "-":
                 for j in range(len(self.M)):
                     self.M[j] = self.M[j][:i] + "-" + self.M[j][i:]
-
-            i += 1
-            if i >= len(self.M[0]):
-                break
-
-            if self.M[0] == optAlign[0]:
-                break
 
         self.M.append(optAlign[1])
 
@@ -172,7 +171,7 @@ class Alignment:
                     if i>0 and j>=0 and k>=0:
                         v5 = self.T[i-1][j][k] + self.gapcost(0) + self.gapcost(0)
                     if i>=0 and j>0 and k>=0:
-                            v6 = self.T[i][j-1][k] + self.gapcost(0) + self.gapcost(0)
+                        v6 = self.T[i][j-1][k] + self.gapcost(0) + self.gapcost(0)
                     if i>=0 and j>=0 and k>0:
                         v7 = self.T[i][j][k-1] + self.gapcost(0) + self.gapcost(0)
 
@@ -240,7 +239,7 @@ class Alignment:
 
                 # Gap in A and C
                 a = ("-") + a
-                b = B[i-1] + b
+                b = B[j-1] + b
                 c = ("-") + c
                 j -= 1
 
@@ -378,8 +377,11 @@ class GetArguments:
 
     def read_fasta(self, infile):
         seqs = []
+        self.heads = []
         for record in SeqIO.parse(infile, "fasta"):
+            self.heads.append(str(record.id))
             seqs.append(str(record.seq))
+
         return seqs
 
     def readScoreMatrix(self, infile):
