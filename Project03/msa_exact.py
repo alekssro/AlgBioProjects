@@ -12,4 +12,5 @@ score = test.sp_exact_3()
 alignm = test.backtrack_msa_exact()
 
 for i in range(len(alignm)):
-    print("> ", arguments.heads[i], "\n", test.num_to_sequence(alignm[i]), "\n", sep="")
+    print(">", arguments.heads[i])
+    print(test.num_to_sequence(alignm[i]), "\n")
