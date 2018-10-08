@@ -10,7 +10,7 @@ test = Alignment(arguments.seqs, arguments.score_matrix, arguments.gapcost)
 alignm = test.multiple_align()
 
 for i in range(len(alignm)):
-    print("> ", arguments.heads[i], "\n", test.num_to_sequence(alignm[i]), "\n", sep="")
+    print("> ", arguments.heads[test.seqOrder[i]], "\n", test.num_to_sequence(alignm[i]), "\n", sep="")
 
 # for x in range(len(test.T)):
 #     print(test.T[x])

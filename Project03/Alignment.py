@@ -97,8 +97,8 @@ class Alignment:
         scores = self.initMatrix(len(self.seqs_Nums), len(self.seqs_Nums), 0)
         for i in range(len(self.seqs_Nums)):
             for j in range(len(self.seqs_Nums)):
-                if i != j:
-                    scores[i][j] = self.affine_align(self.seqs_Nums[i], self.seqs_Nums[j])
+                # if i != j:
+                scores[i][j] = self.affine_align(self.seqs_Nums[i], self.seqs_Nums[j])
 
             if sum(scores[i]) < sumOfScores:
                 sumOfScores = sum(scores[i])
@@ -133,6 +133,10 @@ class Alignment:
 
     def multiple_align(self):
         self.centerStr = self.findCenterStr()       # index for the center string
+        self.seqOrder = [self.centerStr]
+        origin_list = list(range(len(self.seqs_Nums)))
+        origin_list.pop(self.centerStr)
+        self.seqOrder += origin_list
         self.M = None
         # self.M = self.initMatrix(2, len(self.seqs_Nums[self.centerStr]))
         optAlign = []
