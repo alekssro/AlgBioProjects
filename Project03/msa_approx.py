@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # Usage: ./msa_approx.py score_matrix 5 test.fa
+# Requires Alignment.py in the directory
 
 from Alignment import Alignment
 from Alignment import GetArguments
