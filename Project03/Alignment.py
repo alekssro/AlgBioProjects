@@ -114,7 +114,7 @@ class Alignment:
             return
 
         i = 0
-        while self.M[0] != optAlign[0]:
+        while True:
 
             if self.M[0][i] == "-":
                 optAlign[0] = optAlign[0][:i] + '-' + optAlign[0][i:]
@@ -124,10 +124,10 @@ class Alignment:
                     self.M[j] = self.M[j][:i] + "-" + self.M[j][i:]
 
             i += 1
-
             if i >= len(self.M[0]):
                 break
-            if i >= len(optAlign[0]):
+
+            if self.M[0] == optAlign[0]:
                 break
 
         self.M.append(optAlign[1])
