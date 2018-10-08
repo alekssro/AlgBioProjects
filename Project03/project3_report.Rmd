@@ -1,0 +1,404 @@
+---
+title: "Project 2"
+author: "Alejandro Roca Arroyo and Emil Maag"
+date: "September 18, 2018"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, comment = NA)
+```
+
+
+```{r, echo=FALSE,message=FALSE}
+library(tidyverse)
+# library(readxl)
+```
+
+# Introduction
+
+In this project we implemented and experimented with the exact (dynamic programming based) and the 2-approximation algorithm for global sum-of-pairs multiple alignment. We wrote two programs: `msa_exact.py` that implements the exact algorithm for computing an optimal MSA of 3 sequences and its score (decribed on page 408 in BA, or in Section 14.6.1 in Gusfield's book), and `msa_approx.py` that implements the 2-approximation algorithm for any number of sequences (described in Section 8.2.2 in BA, or in Section 14.6.2 in Gusfield's book). Both programs use classes contained in `Alignment.py`.
+ 
+# Methods 
+
+We defined classes for the data in the exercise with the methods we needed, in order to access them easily.
+
+The following example shows how to use the programs from the command line:   
+
+`./msa_exact.py score_matrix gapcost file_with_sequences.fasta`
+`./msa_approx.py score_matrix gapcost file_with_sequences.fasta`
+
+The followng list describes the arguments in more detail:
+
+Arguments:
+
+ - score_matrix: file containing the score matrix used for the alignment. In a "Phylip-like" format.
+ 
+ - gapcost: a number corresponding to the desired gap cost value.
+     
+ - file_with_sequences.fasta: a fasta file containing multiple sequences that will be aligned.
+
+The file with sequence in fasta format (file_with_sequences.fasta) as well as the score_matrix file and the library containing the appropriate methods (Alignment.py) have to be located in the same folder as the programs for execution.  
+
+#### Code remarks
+
+The key in this project was to find the way to extend the multiple alignment matrix (M), as the rest of the methods don't differ much from what we have talked about in class. This algorithm was implemented in the following way:
+
+```{python eval=F}
+def extendM(self, optAlign):
+
+    if not self.M:  # empty alignment matrix (first time we call the matrix)
+        self.M = optAlign   # first optimal alignment = M (initialize)
+        return
+
+    i = 0
+    while self.M[0] != optAlign[0]: 
+        # The first element of the alignment matrix and the one in the optimal 
+        # alignment should be the same in the last iteration
+        if i < len(self.M[0]):  # avoid index out of range (see elif)
+
+            if self.M[0][i] == "-": # finds a gap in the center string (0) in the alignment (M)
+                optAlign[0] = optAlign[0][:i] + '-' + optAlign[0][i:]   # add gap in optAlign at position i
+                optAlign[1] = optAlign[1][:i] + '-' + optAlign[1][i:]   # add gap in optAlign at position i
+            elif optAlign[0][i] == "-": # finds a gap in the center string in the optimal alignment
+                for j in range(len(self.M)):
+                    self.M[j] = self.M[j][:i] + "-" + self.M[j][i:] # add gap in all the sequences of the M alignment 
+
+            i += 1
+            
+        elif optAlign[0][i] == "-": 
+            # finds a gap at the end of the OptAlign, meaning optAlign length > M[j]
+            for j in range(len(self.M)):
+                self.M[j] = self.M[j][:i] + "-" + self.M[j][i:] # add gap in all the sequences of the M alignment
+
+    self.M.append(optAlign[1])  # add new aligned sequence once all changes are done
+```
+
+As explained in the code, if it is the first time we run the code, we assign the optimal alignment to the M matrix (which contains the aligned sequences). In the following runs, we will iterate until the changes made in the center sequence both in M and in the optimal alignment, make them the same sequences (meaning we are ready to add the new sequence, second element of the optimal alignment). We then iterate through all the positions in the sequences and,
+
+- if we find a gap in the ith position of the first sequence of the M (center string), we need to add a gap in both sequences of the optimal alignment, at position i.
+
+- if we find a gap in the ith position of the first sequence of the optimal alignment (center string pairwise-aligned), we need to add a gap in all sequences of the multiple alignment matrix, at position i.
+
+After one or none of these conditions are met, we check the next position in the sequences (increase i). If the i is higher than the length of the sequences of the multiple alignment matrix M, meaning the optimal alignment length is higher, we will see a gap in the last position of the center string pairwise-aligned. We again add a gap to all the sequences in the M matrix, at last position.
+
+######### CONTINUE HERE #############
+
+# Tests
+
+### Test cases for global alignment usign linear and affine gap cost
+
+### Case 1   
+
+```{bash, echo=F}
+echo ">seq1
+acgtgtcaacgt" > seq1.fa 
+
+echo ">seq2
+acgtcgtagcta" > seq2.fa 
+
+echo "Using linear gap cost g(k)=5*k, the expected score of an optimal alignment is -> 22"
+echo "Obtained result:"
+./global_alignment.py seq1.fa seq2.fa score_matrix -l 5
+
+echo ""
+echo "And the optimal alignment should be one of these:"
+
+echo "
+acgt-gtcaacgt-
+acgtcgt-agc-ta
+
+acgt-gtcaacgt
+acgtcgt-agcta
+"
+
+echo "Obtained alignment:"
+./global_alignment.py seq1.fa seq2.fa score_matrix -l 5 -o
+
+echo ""
+echo "Using affine gap cost g(k)=5+5*k, the expected score of an optimal alignment is -> 24"
+echo "Obtained result:"
+./global_alignment.py seq1.fa seq2.fa score_matrix -a 5 5
+
+echo ""
+echo "and an optimal alignment is:"
+
+echo "
+acgtgtcaacgt
+acgtcgtagcta
+"
+
+echo "Obtained alignment:"
+./global_alignment.py seq1.fa seq2.fa score_matrix -a 5 5 -o
+```
+
+### Case 2   
+
+```{bash, echo=F}
+echo ">seq1
+aataat" > seq1.fa 
+
+echo ">seq2
+aagg" > seq2.fa 
+
+echo "Using linear gap cost g(k)=5*k, the expected score of an optimal alignment is -> 14"
+echo "Obtained result:"
+./global_alignment.py seq1.fa seq2.fa score_matrix -l 5 
+
+echo ""
+echo "And the optimal alignment should be:
+
+aataat
+aa-gg-
+"
+
+echo "Obtained alignment:"
+./global_alignment.py seq1.fa seq2.fa score_matrix -l 5 -o
+
+echo ""
+echo "Using affine gap cost g(k)=5+5*k, the expected score of an optimal alignment is -> 22"
+echo "Obtained result:"
+./global_alignment.py seq1.fa seq2.fa score_matrix -a 5 5
+
+echo ""
+echo "And the optimal alignment should be one of these:"
+
+echo "
+aataat
+aagg--
+
+aataat
+aa--gg
+
+aataat
+a--agg"
+
+echo ""
+echo "Obtained alignment:"
+./global_alignment.py seq1.fa seq2.fa score_matrix -a 5 5 -o
+```
+
+### Case 3   
+
+```{bash, echo=F}
+echo ">seq1
+tccagaga" > seq1.fa 
+
+echo ">seq2
+tcgat" > seq2.fa 
+
+echo "Using linear gap cost g(k)=5*k, the expected score of an optimal alignment is -> 20"
+echo "Obtained result:"
+./global_alignment.py seq1.fa seq2.fa score_matrix -l 5 
+
+echo ""
+echo "And the optimal alignment should be:
+
+tccagaga
+tc--gat-
+
+tccagaga
+t-c-gat-
+
+tccagaga
+tc--ga-t
+
+tccagaga
+t-c-ga-t
+
+"
+
+echo "Obtained alignment:"
+./global_alignment.py seq1.fa seq2.fa score_matrix -l 5 -o
+
+echo ""
+echo "Using affine gap cost g(k)=5+5*k, the expected score of an optimal alignment is -> 29"
+echo "Obtained result:"
+./global_alignment.py seq1.fa seq2.fa score_matrix -a 5 5
+
+echo ""
+echo "And the optimal alignment should be one of these:"
+
+echo "
+tccagaga
+tc---gat
+"
+
+echo "Obtained alignment:"
+./global_alignment.py seq1.fa seq2.fa score_matrix -a 5 5 -o
+rm seq1.fa
+rm seq2.fa
+```
+
+### Evaluation cases for global alignment usign linear and affine gap cost.
+
+All questions are answered by showing the program used in the command line and the answers the program gave. 
+
+For question 3 and 4 a bash program were written to produce the desired matrices. 
+
+
+Question 1
+----------
+
+Compute the score of an optimal alignment and an optimal alignment of
+seq1 and seq2 above using the programs global_linear using the above
+score matrix M and gap cost g(k)=5*k.
+
+Answers:
+
+```{bash, eval=T}
+./global_alignment.py sequences/seq1.fasta sequences/seq2.fasta score_matrix -l 5
+```
+
+```{bash, eval=T}
+./global_alignment.py sequences/seq1.fasta sequences/seq2.fasta score_matrix -l 5 -o
+```
+
+optimal alignment:
+
+>seq1
+
+TATGGA-GAGAATAAAAGAACTGAGAGATCT-AATGTCGCAGTCCCGCAC-TC
+
+GCGAGATACT-CACTAAGAC-CACTGTGGACCATATGGCCATAATCAAAAAG
+
+>seq2
+
+A-TGGATGTCAATCCGA-CTCTACTTTTCCTAAAAATTCCAGCGCAAAATGCC
+
+ATAAG-CACCACATTCCCTTATACTGGAGATCCT-CCA-TACAGCCATGGAA
+
+
+Question 2
+----------
+
+Compute the score of an optimal alignment and an optimal alignment of
+seq1 and seq2 above using the program global_affine using the above
+score matrix M and gap cost g(k)=5+5*k.
+
+Answers:
+
+```{bash, eval=T}
+./global_alignment.py sequences/seq1.fasta sequences/seq2.fasta score_matrix -a 5 5
+```
+
+optimal alignment score: 269.0
+
+```{bash, eval=T}
+./global_alignment.py sequences/seq1.fasta sequences/seq2.fasta score_matrix -a 5 5 -o
+```
+
+optimal alignment:
+
+>seq1
+
+TATGGAGAGAATAAAAGAACTGAGAGATCT-AATGTCGCAGTCCCGCAC-TCG
+
+CGAGATACTCACTAAGAC-CACTGTGGACCATATGGCCATAATCAAAAAG
+
+>seq2
+
+ATGGATGTCAATCCGA-CTCTACTTTTCCTAAAAATTCCAGCGCAAAATGCCA
+
+TAAGCACCACATTCCCTTATACTGGAGATCCT-CCA-TACAGCCATGGAA
+
+
+
+Question 3
+----------
+
+Compute the optimal score of an optimal alignment for each pair of the
+5 sequences above using global_linear with the score matrix M and gap
+cost g(k)=5*k. The result is a 5x5 table where entry (i,j) the optimal
+score of an alignment of seqi and seqj.
+
+Answer:
+
+```{bash}
+./evaluate_global_alignment.sh 0 5
+```
+
+0 231.0 206.0 202.0 214.0
+
+226.0 0 239.0 223.0 220.0
+
+206.0 242.0 0 219.0 205.0
+
+202.0 223.0 219.0 0 210.0
+
+209.0 220.0 205.0 210.0 0 
+
+Question 4
+----------
+
+Compute the optimal score of an optimal alignment for each pair of the
+5 sequences above using global_affine with the score matrix M and gap
+cost g(k)=5+5*k. The result is a 5x5 table where entry (i,j) the
+optimal score of an alignment of seqi and seqj.
+
+Answer:
+
+```{bash}
+./evaluate_global_alignment.sh 5 5
+```
+
+0 269.0 242.0 243.0 261.0
+
+266.0 0 283.0 259.0 254.0
+
+242.0 284.0 0 270.0 243.0
+
+243.0 259.0 269.0 0 247.0
+
+256.0 254.0 243.0 247.0 0
+
+
+
+#Experiments
+
+As mentioned the algorithm should be running in quadratic time and space. This is firstly investigated for the algorithm doing pairwise global aligment with a linear gap cost (global_linear) and secondly for the algorithm doing pairwise global aligment with a affine gap cost (global_affine). 
+
+A bash script was written that measure the time consumption for the algorithm. This bash script takes a number that defines how many times two predefined sequences(sequence 1 and sequence 2) are duplicated. These sequences are passed to to a command line that runs the main algortihm with the two sequences, and measures the time consumption of the algorithm. The bash script were run iterating through the values 1 to 10, measuring the time consumption of the algorithm for increasing n. (1 to 10 duplications of the original sequences)
+
+```{bash, eval = F, echo = T, results = 'hide'}
+./measureTime_global_alignment.sh 0 5 15 2> Output/times_linearCost.txt
+./measureTime_global_alignment.sh 5 5 15 2> Output/times_affineCost.txt
+```
+
+
+```{r, echo=FALSE}
+
+times_linear <- read.table("Output/times_linearCost.txt")
+Ns <- times_linear$V1[c(T,F)]
+secs_linear <- times_linear$V1[c(F,T)]
+
+times_affine <- read.table("Output/times_affineCost.txt")
+secs_affine <- times_affine$V1[c(F,T)]
+# Ns_affine <- times_affine$V1[c(T,F)]
+
+timings <- data.frame(n = Ns, linear = secs_linear, affine = secs_affine)
+
+time_plot <- ggplot(data=timings)+
+  geom_point(aes(x=n,y=linear/n^2))+
+  geom_line(aes(x=n,y=linear/n^2,color="darkblue"))+
+  geom_point(aes(x=n,y=affine/n^2))+
+  geom_line(aes(x=n,y=affine/n^2,color="red"))+
+  ggtitle("Global aligment with linear and affine gap cost")+
+  ylab("Seconds/N^2")+
+  scale_color_discrete(name = "Gap costs", labels = c("Linear", "Affine"))
+
+time_plot
+```
+
+As seen from the plot the algorithm does run in quadratic time as expected. Global alignment with linear gap cost seems pretty semilar to global aligment with affine gapcost. As the affine gap cost uses more matrices it makes sense that this version of the algorithm seems to take a little more time then the linear gap cost version when n becomes larger. Much larger numbers of n might elucidate the difference better.    
+
+
+
+
+
+
+
+
+
+
+
