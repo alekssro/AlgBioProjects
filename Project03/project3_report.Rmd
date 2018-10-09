@@ -1,12 +1,12 @@
 ---
 title: "Project 2"
 author: "Alejandro Roca Arroyo and Emil Maag"
-date: "September 18, 2018"
+date: "October 9, 2018"
 output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, comment = NA)
+knitr::opts_chunk$set(echo = TRUE, tidy = T, tidy.opts = list(width.cutoff=60))
 ```
 
 
@@ -44,34 +44,42 @@ The file with sequence in fasta format (file_with_sequences.fasta) as well as th
 
 The key in this project was to find the way to extend the multiple alignment matrix (M), as the rest of the methods don't differ much from what we have talked about in class. This algorithm was implemented in the following way:
 
-```{python eval=F}
+```
 def extendM(self, optAlign):
-
-    if not self.M:  # empty alignment matrix (first time we call the matrix)
-        self.M = optAlign   # first optimal alignment = M (initialize)
-        return
-
-    i = 0
-    while self.M[0] != optAlign[0]: 
-        # The first element of the alignment matrix and the one in the optimal 
-        # alignment should be the same in the last iteration
-        if i < len(self.M[0]):  # avoid index out of range (see elif)
-
-            if self.M[0][i] == "-": # finds a gap in the center string (0) in the alignment (M)
-                optAlign[0] = optAlign[0][:i] + '-' + optAlign[0][i:]   # add gap in optAlign at position i
-                optAlign[1] = optAlign[1][:i] + '-' + optAlign[1][i:]   # add gap in optAlign at position i
-            elif optAlign[0][i] == "-": # finds a gap in the center string in the optimal alignment
-                for j in range(len(self.M)):
-                    self.M[j] = self.M[j][:i] + "-" + self.M[j][i:] # add gap in all the sequences of the M alignment 
-
-        elif optAlign[0][i] == "-": 
-            # finds a gap at the end of the OptAlign, meaning optAlign length > M[j]
-            for j in range(len(self.M)):
-                self.M[j] = self.M[j][:i] + "-" + self.M[j][i:] # add gap in all the sequences of the M alignment
-        
-        i += 1
-
-    self.M.append(optAlign[1])  # add new aligned sequence once all changes are done
+  
+  if not self.M:  # empty alignment matrix (first time we call the matrix)
+      self.M = optAlign   # first optimal alignment = M (initialize)
+      return
+  
+  i = 0
+  while self.M[0] != optAlign[0]: 
+      # The first element of the alignment matrix and the one in the optimal 
+      # alignment should be the same in the last iteration
+      if i < len(self.M[0]):  # avoid index out of range (see elif)
+  
+          if self.M[0][i] == "-":
+          # finds a gap in the center string (0) in the alignment (M)
+    
+              optAlign[0] = optAlign[0][:i] + 
+                            '-' + optAlign[0][i:]   # add gap in optAlign at position i
+              optAlign[1] = optAlign[1][:i] + 
+                            '-' + optAlign[1][i:]   # add gap in optAlign at position i
+              
+          elif optAlign[0][i] == "-": 
+          # finds a gap in center string in the optimal alignment
+              for j in range(len(self.M)):
+                  self.M[j] = self.M[j][:i] + 
+                    "-" + self.M[j][i:] # add gap in all the sequences of the M alignment 
+  
+      elif optAlign[0][i] == "-": 
+          # finds a gap at the end of the OptAlign, meaning optAlign length > M[j]
+          for j in range(len(self.M)):
+              self.M[j] = self.M[j][:i] + 
+                "-" + self.M[j][i:] # add gap in all the sequences of the M alignment
+      
+      i += 1
+  
+  self.M.append(optAlign[1])  # add new aligned sequence once all changes are done
 ```
 
 As explained in the code, if it is the first time we run the code, we assign the optimal alignment to the M matrix (which contains the aligned sequences). In the following runs, we will iterate until the changes made in the center sequence both in M and in the optimal alignment, make them the same sequences (meaning we are ready to add the new sequence, second element of the optimal alignment). We then iterate through all the positions in the sequences and,
@@ -107,14 +115,16 @@ python3 msa_sp_score_3k.py testdata_long_aligned.fa
 ```{bash echo=F}
 echo "Expected alignment score of sequences in testdata_short.txt: >=198"
 echo "Obtained result:"
-./msa_approx.py score_matrix 5 testdata_short.txt > testdata_short_aligned.fa     # Get alignment
+# Get alignment
+./msa_approx.py score_matrix 5 testdata_short.txt > testdata_short_aligned.fa     
 python3 msa_sp_score_3k.py testdata_short_aligned.fa     # Compute score
 ```
 \   
 ```{bash echo=F}
 echo "Expected alignment score of sequences in testdata_long.txt: >= 1482"
 echo "Obtained result:"
-./msa_approx.py score_matrix 5 testdata_long.txt > testdata_long_aligned.fa     # Get alignment
+# Get alignment
+./msa_approx.py score_matrix 5 testdata_long.txt > testdata_long_aligned.fa     
 python3 msa_sp_score_3k.py testdata_long_aligned.fa     # Compute score
 
 # Clean generated files
@@ -167,176 +177,46 @@ head -n 1 brca1-first5_aligned.fa
 rm brca1-first5_aligned.fa brca1-first5.fasta
 ```
 
+### Make an experiment comparing the scores of the alignments computed by sp_exact_3 and sp_approx that validates that the approximation ratio of sp_approx is 2(k-1)/k for k sequences. i.e 4/3 for three sequences.
 
-Make an experiment comparing the scores of the alignments computed by sp_exact_3 and sp_approx that validates that the approximation ratio of sp_approx is 2(k-1)/k for k sequences. i.e 4/3 for three sequences.
-
-You should use the testdata in  testseqs.zip
-
-that contains 20 fasta files (testseqs_10_3.fasta, testseqs_20_3.fasta, ..., testseqs_200_3.fasta) each containing 3 sequences of lengths 10, 20, ..., 200.
+You should use the testdata in `testseqs.zip` that contains 20 fasta files (testseqs_10_3.fasta, testseqs_20_3.fasta, ..., testseqs_200_3.fasta) each containing 3 sequences of lengths 10, 20, ..., 200.
 For each triplet of sequences (i.e. each fasta file), you should compute the optimal score of an MSA using sp_exact_3 and the score of the alignment produced by sp_approx. Make a graph in which you plot the ratio of the computed scores for each sequence length. Comment on what you observe.
 
-### Evaluation cases for global alignment usign linear and affine gap cost.
+```{bash}
+echo -n "" > scores_exact.txt   # Create empty file to store exact scores
+echo -n "" > scores_approx.txt  # Create empty file to store approx. scores
+for seq_triplet in testseqs/* 
+do
 
-All questions are answered by showing the program used in the command line and the answers the program gave. 
+    ./msa_exact.py score_matrix 5 $seq_triplet > seq_triplet_aligned_exact.fa
+    ./msa_approx.py score_matrix 5 $seq_triplet > seq_triplet_aligned_approx.fa
+    
+    python3 msa_sp_score_3k.py seq_triplet_aligned_exact.fa >> scores_exact.txt
+    python3 msa_sp_score_3k.py seq_triplet_aligned_approx.fa >> scores_approx.txt
 
-For question 3 and 4 a bash program were written to produce the desired matrices. 
-
-
-Question 1
-----------
-
-Compute the score of an optimal alignment and an optimal alignment of
-seq1 and seq2 above using the programs global_linear using the above
-score matrix M and gap cost g(k)=5*k.
-
-Answers:
-
-```{bash, eval=T}
-./global_alignment.py sequences/seq1.fasta sequences/seq2.fasta score_matrix -l 5
+done
+rm seq_triplet_aligned_exact.fa seq_triplet_aligned_approx.fa
 ```
 
-```{bash, eval=T}
-./global_alignment.py sequences/seq1.fasta sequences/seq2.fasta score_matrix -l 5 -o
-```
+Plotting the score results we can see:
 
-optimal alignment:
+```{r, eval=T, echo=FALSE}
+scores_exact <- read.table("scores_exact.txt", header = F)
+scores_approx <- read.table("scores_approx.txt", header = F)
 
->seq1
+scores <- data.frame(exact = scores_exact$V1, approx = scores_approx$V1)
 
-TATGGA-GAGAATAAAAGAACTGAGAGATCT-AATGTCGCAGTCCCGCAC-TC
-
-GCGAGATACT-CACTAAGAC-CACTGTGGACCATATGGCCATAATCAAAAAG
-
->seq2
-
-A-TGGATGTCAATCCGA-CTCTACTTTTCCTAAAAATTCCAGCGCAAAATGCC
-
-ATAAG-CACCACATTCCCTTATACTGGAGATCCT-CCA-TACAGCCATGGAA
-
-
-Question 2
-----------
-
-Compute the score of an optimal alignment and an optimal alignment of
-seq1 and seq2 above using the program global_affine using the above
-score matrix M and gap cost g(k)=5+5*k.
-
-Answers:
-
-```{bash, eval=T}
-./global_alignment.py sequences/seq1.fasta sequences/seq2.fasta score_matrix -a 5 5
-```
-
-optimal alignment score: 269.0
-
-```{bash, eval=T}
-./global_alignment.py sequences/seq1.fasta sequences/seq2.fasta score_matrix -a 5 5 -o
-```
-
-optimal alignment:
-
->seq1
-
-TATGGAGAGAATAAAAGAACTGAGAGATCT-AATGTCGCAGTCCCGCAC-TCG
-
-CGAGATACTCACTAAGAC-CACTGTGGACCATATGGCCATAATCAAAAAG
-
->seq2
-
-ATGGATGTCAATCCGA-CTCTACTTTTCCTAAAAATTCCAGCGCAAAATGCCA
-
-TAAGCACCACATTCCCTTATACTGGAGATCCT-CCA-TACAGCCATGGAA
-
-
-
-Question 3
-----------
-
-Compute the optimal score of an optimal alignment for each pair of the
-5 sequences above using global_linear with the score matrix M and gap
-cost g(k)=5*k. The result is a 5x5 table where entry (i,j) the optimal
-score of an alignment of seqi and seqj.
-
-Answer:
-
-```{bash eval=F}
-./evaluate_global_alignment.sh 0 5
-```
-
-0 231.0 206.0 202.0 214.0
-
-226.0 0 239.0 223.0 220.0
-
-206.0 242.0 0 219.0 205.0
-
-202.0 223.0 219.0 0 210.0
-
-209.0 220.0 205.0 210.0 0 
-
-Question 4
-----------
-
-Compute the optimal score of an optimal alignment for each pair of the
-5 sequences above using global_affine with the score matrix M and gap
-cost g(k)=5+5*k. The result is a 5x5 table where entry (i,j) the
-optimal score of an alignment of seqi and seqj.
-
-Answer:
-
-```{bash eval=F}
-./evaluate_global_alignment.sh 5 5
-```
-
-0 269.0 242.0 243.0 261.0
-
-266.0 0 283.0 259.0 254.0
-
-242.0 284.0 0 270.0 243.0
-
-243.0 259.0 269.0 0 247.0
-
-256.0 254.0 243.0 247.0 0
-
-
-
-#Experiments
-
-As mentioned the algorithm should be running in quadratic time and space. This is firstly investigated for the algorithm doing pairwise global aligment with a linear gap cost (global_linear) and secondly for the algorithm doing pairwise global aligment with a affine gap cost (global_affine). 
-
-A bash script was written that measure the time consumption for the algorithm. This bash script takes a number that defines how many times two predefined sequences(sequence 1 and sequence 2) are duplicated. These sequences are passed to to a command line that runs the main algortihm with the two sequences, and measures the time consumption of the algorithm. The bash script were run iterating through the values 1 to 10, measuring the time consumption of the algorithm for increasing n. (1 to 10 duplications of the original sequences)
-
-```{bash, eval = F, echo = T, results = 'hide'}
-./measureTime_global_alignment.sh 0 5 15 2> Output/times_linearCost.txt
-./measureTime_global_alignment.sh 5 5 15 2> Output/times_affineCost.txt
-```
-
-
-```{r, eval=F, echo=FALSE}
-
-times_linear <- read.table("Output/times_linearCost.txt")
-Ns <- times_linear$V1[c(T,F)]
-secs_linear <- times_linear$V1[c(F,T)]
-
-times_affine <- read.table("Output/times_affineCost.txt")
-secs_affine <- times_affine$V1[c(F,T)]
-# Ns_affine <- times_affine$V1[c(T,F)]
-
-timings <- data.frame(n = Ns, linear = secs_linear, affine = secs_affine)
-
-time_plot <- ggplot(data=timings)+
-  geom_point(aes(x=n,y=linear/n^2))+
-  geom_line(aes(x=n,y=linear/n^2,color="darkblue"))+
-  geom_point(aes(x=n,y=affine/n^2))+
-  geom_line(aes(x=n,y=affine/n^2,color="red"))+
-  ggtitle("Global aligment with linear and affine gap cost")+
-  ylab("Seconds/N^2")+
-  scale_color_discrete(name = "Gap costs", labels = c("Linear", "Affine"))
+time_plot <- ggplot(data=scores, aes(x=exact,y=approx))+
+    geom_point(color="darkblue")+
+    geom_abline(aes(slope=4/3, intercept=0, color = "2(k-1)/k"))+
+    geom_abline(aes(slope=1, intercept = 0, color = "1:1 ratio")) +
+    ggtitle("Ratio of the computed scores for each sequence length")+
+    ylab("Approximate approach") + xlab("Exact approach")
 
 time_plot
 ```
 
-As seen from the plot the algorithm does run in quadratic time as expected. Global alignment with linear gap cost seems pretty semilar to global aligment with affine gapcost. As the affine gap cost uses more matrices it makes sense that this version of the algorithm seems to take a little more time then the linear gap cost version when n becomes larger. Much larger numbers of n might elucidate the difference better.    
-
+We can see that the approximation is between 2(k-1)/k (blue line), 4/3 in this case as we are working with triplets, and the exact value (red line). This result matches our expectations.
 
 
 
