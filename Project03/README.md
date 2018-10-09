@@ -5,16 +5,6 @@ date: "October 9, 2018"
 output: pdf_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, comment = NA, tidy = T, tidy.opts = list(width.cutoff=60))
-```
-
-
-```{r, echo=FALSE,message=FALSE}
-library(tidyverse)
-# library(readxl)
-```
-
 # Introduction
 
 In this project we implemented and experimented with the exact (dynamic programming based) and the 2-approximation algorithm for global sum-of-pairs multiple alignment. We wrote two programs: `msa_exact.py` that implements the exact algorithm for computing an optimal MSA of 3 sequences and its score (decribed on page 408 in BA, or in Section 14.6.1 in Gusfield's book), and `msa_approx.py` that implements the 2-approximation algorithm for any number of sequences (described in Section 8.2.2 in BA, or in Section 14.6.2 in Gusfield's book). Both programs use classes contained in `Alignment.py`.
