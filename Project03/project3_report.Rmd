@@ -1,5 +1,5 @@
 ---
-title: "Project 2"
+title: "Project 3"
 author: "Alejandro Roca Arroyo and Emil Maag"
 date: "October 9, 2018"
 output: pdf_document
@@ -18,8 +18,8 @@ library(tidyverse)
 # Introduction
 
 In this project we implemented and experimented with the exact (dynamic programming based) and the 2-approximation algorithm for global sum-of-pairs multiple alignment. We wrote two programs: `msa_exact.py` that implements the exact algorithm for computing an optimal MSA of 3 sequences and its score (decribed on page 408 in BA, or in Section 14.6.1 in Gusfield's book), and `msa_approx.py` that implements the 2-approximation algorithm for any number of sequences (described in Section 8.2.2 in BA, or in Section 14.6.2 in Gusfield's book). Both programs use classes contained in `Alignment.py`.
- 
-# Methods 
+
+# Methods
 
 We defined classes for the data in the exercise with the methods we needed, in order to access them easily.
 
@@ -33,9 +33,9 @@ The followng list describes the arguments in more detail:
 Arguments:
 
  - score_matrix: file containing the score matrix used for the alignment. In a "Phylip-like" format.
- 
+
  - gapcost: a number corresponding to the desired gap cost value.
-     
+
  - file_with_sequences.fasta: a fasta file containing multiple sequences that will be aligned.
 
 The file with sequence in fasta format (file_with_sequences.fasta) as well as the score_matrix file and the library containing the appropriate methods (Alignment.py) have to be located in the same folder as the programs for execution.  
@@ -46,39 +46,39 @@ The key in this project was to find the way to extend the multiple alignment mat
 
 ```{r eval=F, echo=T}
 def extendM(self, optAlign):
-  
+
   if not self.M:  # empty alignment matrix (first time we call the matrix)
       self.M = optAlign   # first optimal alignment = M (initialize)
       return
-  
+
   i = 0
-  while self.M[0] != optAlign[0]: 
-      # The first element of the alignment matrix and the one in the optimal 
+  while self.M[0] != optAlign[0]:
+      # The first element of the alignment matrix and the one in the optimal
       # alignment should be the same in the last iteration
       if i < len(self.M[0]):  # avoid index out of range (see elif)
-  
+
           if self.M[0][i] == "-":
           # finds a gap in the center string (0) in the alignment (M)
-    
-              optAlign[0] = optAlign[0][:i] + 
+
+              optAlign[0] = optAlign[0][:i] +
                             '-' + optAlign[0][i:]   # add gap in optAlign at position i
-              optAlign[1] = optAlign[1][:i] + 
+              optAlign[1] = optAlign[1][:i] +
                             '-' + optAlign[1][i:]   # add gap in optAlign at position i
-              
-          elif optAlign[0][i] == "-": 
+
+          elif optAlign[0][i] == "-":
           # finds a gap in center string in the optimal alignment
               for j in range(len(self.M)):
-                  self.M[j] = self.M[j][:i] + 
-                    "-" + self.M[j][i:] # add gap in all the sequences of the M alignment 
-  
-      elif optAlign[0][i] == "-": 
+                  self.M[j] = self.M[j][:i] +
+                    "-" + self.M[j][i:] # add gap in all the sequences of the M alignment
+
+      elif optAlign[0][i] == "-":
           # finds a gap at the end of the OptAlign, meaning optAlign length > M[j]
           for j in range(len(self.M)):
-              self.M[j] = self.M[j][:i] + 
+              self.M[j] = self.M[j][:i] +
                 "-" + self.M[j][i:] # add gap in all the sequences of the M alignment
-      
+
       i += 1
-  
+
   self.M.append(optAlign[1])  # add new aligned sequence once all changes are done
 ```
 
@@ -197,11 +197,11 @@ To answer this question we implemented the following shell script:
 ```{bash eval=F, echo=T}
 echo -n "" > scores/scores_exact.txt   # Create empty file to store exact scores
 echo -n "" > scores/scores_approx.txt  # Create empty file to store approx. scores
-for seq_triplet in testseqs/* 
+for seq_triplet in testseqs/*
 do
     ./msa_exact.py score_matrix 5 $seq_triplet > seq_triplet_aligned_exact.fa
     ./msa_approx.py score_matrix 5 $seq_triplet > seq_triplet_aligned_approx.fa
-    
+
     python3 msa_sp_score_3k.py seq_triplet_aligned_exact.fa >> scores/scores_exact.txt
     python3 msa_sp_score_3k.py seq_triplet_aligned_approx.fa >> scores/scores_approx.txt
 done
@@ -227,13 +227,3 @@ time_plot
 ```
 
 We can see that the approximation is between 2(k-1)/k (blue line), 4/3 in this case as we are working with triplets, and the exact value (red line). This result matches our expectations.
-
-
-
-
-
-
-
-
-
-

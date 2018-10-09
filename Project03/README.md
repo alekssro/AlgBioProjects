@@ -1,5 +1,5 @@
 ---
-title: "Project 2"
+title: "Project 3"
 author: "Alejandro Roca Arroyo and Emil Maag"
 date: "October 9, 2018"
 output: pdf_document
