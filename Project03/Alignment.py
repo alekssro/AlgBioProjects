@@ -1,4 +1,5 @@
 import sys
+import random
 from Bio import SeqIO
 
 # We define a class for the data in the exercise with the methods we will need, in order to access easily to them
@@ -29,6 +30,7 @@ class Alignment:
         sequence = sequence.replace('C', '1')
         sequence = sequence.replace('G', '2')
         sequence = sequence.replace('T', '3')
+        sequence = sequence.replace('N', str(random.randint(0, 3)))
 
         return sequence
 
