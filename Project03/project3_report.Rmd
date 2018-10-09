@@ -64,12 +64,12 @@ def extendM(self, optAlign):
                 for j in range(len(self.M)):
                     self.M[j] = self.M[j][:i] + "-" + self.M[j][i:] # add gap in all the sequences of the M alignment 
 
-            i += 1
-            
         elif optAlign[0][i] == "-": 
             # finds a gap at the end of the OptAlign, meaning optAlign length > M[j]
             for j in range(len(self.M)):
                 self.M[j] = self.M[j][:i] + "-" + self.M[j][i:] # add gap in all the sequences of the M alignment
+        
+        i += 1
 
     self.M.append(optAlign[1])  # add new aligned sequence once all changes are done
 ```
@@ -82,153 +82,60 @@ As explained in the code, if it is the first time we run the code, we assign the
 
 After one or none of these conditions are met, we check the next position in the sequences (increase i). If the i is higher than the length of the sequences of the multiple alignment matrix M, meaning the optimal alignment length is higher, we will see a gap in the last position of the center string pairwise-aligned. We again add a gap to all the sequences in the M matrix, at last position.
 
-######### CONTINUE HERE #############
+### Tests
 
-# Tests
+To verify the correctness of our programs, we were given two fasta files (`testdata_short.txt` and `testdata_long.txt`) from which we know their expected multiple alignment score. We run our programs and check if the score matches the expected (for the exact approach it should be the same and for the approximate approach it should be equal or higher)
 
-### Test cases for global alignment usign linear and affine gap cost
+#### Using exact approach
 
-### Case 1   
-
-```{bash, echo=F}
-echo ">seq1
-acgtgtcaacgt" > seq1.fa 
-
-echo ">seq2
-acgtcgtagcta" > seq2.fa 
-
-echo "Using linear gap cost g(k)=5*k, the expected score of an optimal alignment is -> 22"
+```{bash echo=F}
+echo "Expected alignment score of sequences in testdata_short.txt: 198"
 echo "Obtained result:"
-./global_alignment.py seq1.fa seq2.fa score_matrix -l 5
-
-echo ""
-echo "And the optimal alignment should be one of these:"
-
-echo "
-acgt-gtcaacgt-
-acgtcgt-agc-ta
-
-acgt-gtcaacgt
-acgtcgt-agcta
-"
-
-echo "Obtained alignment:"
-./global_alignment.py seq1.fa seq2.fa score_matrix -l 5 -o
-
-echo ""
-echo "Using affine gap cost g(k)=5+5*k, the expected score of an optimal alignment is -> 24"
+./msa_exact.py score_matrix 5 testdata_short.txt > testdata_short_aligned.fa
+python3 msa_sp_score_3k.py testdata_short_aligned.fa
+```
+\   
+```{bash echo=F}
+echo "Expected alignment score of sequences in testdata_long.txt: 1482"
 echo "Obtained result:"
-./global_alignment.py seq1.fa seq2.fa score_matrix -a 5 5
-
-echo ""
-echo "and an optimal alignment is:"
-
-echo "
-acgtgtcaacgt
-acgtcgtagcta
-"
-
-echo "Obtained alignment:"
-./global_alignment.py seq1.fa seq2.fa score_matrix -a 5 5 -o
+./msa_exact.py score_matrix 5 testdata_long.txt > testdata_long_aligned.fa
+python3 msa_sp_score_3k.py testdata_long_aligned.fa
 ```
 
-### Case 2   
+#### Using approximate approach
 
-```{bash, echo=F}
-echo ">seq1
-aataat" > seq1.fa 
-
-echo ">seq2
-aagg" > seq2.fa 
-
-echo "Using linear gap cost g(k)=5*k, the expected score of an optimal alignment is -> 14"
+```{bash echo=F}
+echo "Expected alignment score of sequences in testdata_short.txt: >=198"
 echo "Obtained result:"
-./global_alignment.py seq1.fa seq2.fa score_matrix -l 5 
-
-echo ""
-echo "And the optimal alignment should be:
-
-aataat
-aa-gg-
-"
-
-echo "Obtained alignment:"
-./global_alignment.py seq1.fa seq2.fa score_matrix -l 5 -o
-
-echo ""
-echo "Using affine gap cost g(k)=5+5*k, the expected score of an optimal alignment is -> 22"
+./msa_approx.py score_matrix 5 testdata_short.txt > testdata_short_aligned.fa
+python3 msa_sp_score_3k.py testdata_short_aligned.fa
+```
+\   
+```{bash echo=F}
+echo "Expected alignment score of sequences in testdata_long.txt: >= 1482"
 echo "Obtained result:"
-./global_alignment.py seq1.fa seq2.fa score_matrix -a 5 5
-
-echo ""
-echo "And the optimal alignment should be one of these:"
-
-echo "
-aataat
-aagg--
-
-aataat
-aa--gg
-
-aataat
-a--agg"
-
-echo ""
-echo "Obtained alignment:"
-./global_alignment.py seq1.fa seq2.fa score_matrix -a 5 5 -o
+./msa_approx.py score_matrix 5 testdata_long.txt > testdata_long_aligned.fa
+python3 msa_sp_score_3k.py testdata_long_aligned.fa
 ```
 
-### Case 3   
+# Experiments
 
-```{bash, echo=F}
-echo ">seq1
-tccagaga" > seq1.fa 
+In the experiments section we were asked to answer the following questions:
 
-echo ">seq2
-tcgat" > seq2.fa 
+What is the score of an optimal aligment of the first 3 sequences in brca1-testseqs.fasta
 
-echo "Using linear gap cost g(k)=5*k, the expected score of an optimal alignment is -> 20"
-echo "Obtained result:"
-./global_alignment.py seq1.fa seq2.fa score_matrix -l 5 
+(i.e. brca1_bos_taurus, brca1_canis_lupus and brca1_gallus_gallus) as computed by your program sp_exact_3? How does an optimal alignment look like?
+What is the score of the alignment of the first 5 sequences in  brca1-testseqs.fasta
 
-echo ""
-echo "And the optimal alignment should be:
+(i.e. brca1_bos_taurus, brca1_canis_lupus, brca1_gallus_gallus, brca1_homo_sapiens, and brca1_macaca_mulatta) as computed by your program sp_approx?
+Which of the 5 sequences is choosen as the 'center string'?
 
-tccagaga
-tc--gat-
+Make an experiment comparing the scores of the alignments computed by sp_exact_3 and sp_approx that validates that the approximation ratio of sp_approx is 2(k-1)/k for k sequences. i.e 4/3 for three sequences.
 
-tccagaga
-t-c-gat-
+You should use the testdata in  testseqs.zip
 
-tccagaga
-tc--ga-t
-
-tccagaga
-t-c-ga-t
-
-"
-
-echo "Obtained alignment:"
-./global_alignment.py seq1.fa seq2.fa score_matrix -l 5 -o
-
-echo ""
-echo "Using affine gap cost g(k)=5+5*k, the expected score of an optimal alignment is -> 29"
-echo "Obtained result:"
-./global_alignment.py seq1.fa seq2.fa score_matrix -a 5 5
-
-echo ""
-echo "And the optimal alignment should be one of these:"
-
-echo "
-tccagaga
-tc---gat
-"
-
-echo "Obtained alignment:"
-./global_alignment.py seq1.fa seq2.fa score_matrix -a 5 5 -o
-rm seq1.fa
-rm seq2.fa
-```
+that contains 20 fasta files (testseqs_10_3.fasta, testseqs_20_3.fasta, ..., testseqs_200_3.fasta) each containing 3 sequences of lengths 10, 20, ..., 200.
+For each triplet of sequences (i.e. each fasta file), you should compute the optimal score of an MSA using sp_exact_3 and the score of the alignment produced by sp_approx. Make a graph in which you plot the ratio of the computed scores for each sequence length. Comment on what you observe.
 
 ### Evaluation cases for global alignment usign linear and affine gap cost.
 
