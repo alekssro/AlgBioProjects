@@ -31,6 +31,7 @@ class Alignment:
         sequence = sequence.replace('G', '2')
         sequence = sequence.replace('T', '3')
         sequence = sequence.replace('N', str(random.randint(0, 3)))
+        sequence = sequence.replace('R', str(random.randint(0, 3)))
 
         return sequence
 
