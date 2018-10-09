@@ -90,10 +90,13 @@ As explained in the code, if it is the first time we run the code, we assign the
 
 After one or none of these conditions are met, we check the next position in the sequences (increase i). If the i is higher than the length of the sequences of the multiple alignment matrix M, meaning the optimal alignment length is higher, we will see a gap in the last position of the center string pairwise-aligned. We again add a gap to all the sequences in the M matrix, at last position.
 
+Another remark in the code would be the replacement of other symbols in the DNA sequences (N and R) by a random nucleotide (A, C, G or T)
+
 ### Tests
 
 To verify the correctness of our programs, we were given two fasta files (`testdata_short.txt` and `testdata_long.txt`, in test_data folder) from which we know their expected multiple alignment score. We run our programs and check if the score matches the expected (for the exact approach it should be the same and for the approximate approach it should be equal or higher)
-
+\  
+\  
 #### Using exact approach
 
 ```{bash echo=F}
@@ -150,7 +153,7 @@ python3 msa_sp_score_3k.py aligned_seqs/brca1-first3_aligned.fa      # Calculate
 rm brca1-first3.fasta
 ```
 
-For visualizing the alignment we took the generated MSA fasta file and we used MView tool from the EMBL-EBI:
+For visualizing the alignment we took the generated MSA fasta file and we used MView tool from the EMBL-EBI (Figure 1).
 
 ![](Figures/brca1_first3_alignment.png)
 
@@ -186,7 +189,7 @@ rm brca1-first5.fasta
 You should use the testdata in `testseqs.zip` that contains 20 fasta files (testseqs_10_3.fasta, testseqs_20_3.fasta, ..., testseqs_200_3.fasta) each containing 3 sequences of lengths 10, 20, ..., 200.
 For each triplet of sequences (i.e. each fasta file), you should compute the optimal score of an MSA using sp_exact_3 and the score of the alignment produced by sp_approx. Make a graph in which you plot the ratio of the computed scores for each sequence length. Comment on what you observe.
 
-```{bash}
+```{bash eval=F, echo=T}
 echo -n "" > scores/scores_exact.txt   # Create empty file to store exact scores
 echo -n "" > scores/scores_approx.txt  # Create empty file to store approx. scores
 for seq_triplet in testseqs/* 
@@ -205,8 +208,8 @@ rm seq_triplet_aligned_exact.fa seq_triplet_aligned_approx.fa
 Plotting the score results we can see:
 
 ```{r, eval=T, echo=FALSE}
-scores_exact <- read.table("scores_exact.txt", header = F)
-scores_approx <- read.table("scores_approx.txt", header = F)
+scores_exact <- read.table("scores/scores_exact.txt", header = F)
+scores_approx <- read.table("scores/scores_approx.txt", header = F)
 
 scores <- data.frame(exact = scores_exact$V1, approx = scores_approx$V1)
 
