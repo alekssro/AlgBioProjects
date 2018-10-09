@@ -25,8 +25,8 @@ We defined classes for the data in the exercise with the methods we needed, in o
 
 The following example shows how to use the programs from the command line:   
 
-`./msa_exact.py score_matrix gapcost file_with_sequences.fasta`
-`./msa_approx.py score_matrix gapcost file_with_sequences.fasta`
+  `./msa_exact.py score_matrix gapcost file_with_sequences.fasta`   
+  `./msa_approx.py score_matrix gapcost file_with_sequences.fasta`
 
 The followng list describes the arguments in more detail:
 
@@ -44,7 +44,7 @@ The file with sequence in fasta format (file_with_sequences.fasta) as well as th
 
 The key in this project was to find the way to extend the multiple alignment matrix (M), as the rest of the methods don't differ much from what we have talked about in class. This algorithm was implemented in the following way:
 
-```
+```{r eval=F, echo=T}
 def extendM(self, optAlign):
   
   if not self.M:  # empty alignment matrix (first time we call the matrix)
@@ -94,9 +94,12 @@ Another remark in the code would be the replacement of other symbols in the DNA 
 
 ### Tests
 
-To verify the correctness of our programs, we were given two fasta files (`testdata_short.txt` and `testdata_long.txt`, in test_data folder) from which we know their expected multiple alignment score. We run our programs and check if the score matches the expected (for the exact approach it should be the same and for the approximate approach it should be equal or higher)
+To verify the correctness of our programs, we were given two fasta files (`testdata_short.txt` and `testdata_long.txt`, in test_data folder) from which we know their expected multiple alignment score. We run our programs and check if the score matches the expected (for the exact approach it should be the same and for the approximate approach it should be equal or higher)  
 \  
-\  
+\   
+\   
+\   
+
 #### Using exact approach
 
 ```{bash echo=F}
@@ -119,7 +122,7 @@ python3 msa_sp_score_3k.py testdata_long_aligned.fa
 echo "Expected alignment score of sequences in testdata_short.txt: >=198"
 echo "Obtained result:"
 # Get alignment
-./msa_approx.py score_matrix 5 test_data/testdata_short.txt > testdata_short_aligned.fa     
+./msa_approx.py score_matrix 5 test_data/testdata_short.txt > testdata_short_aligned.fa   
 python3 msa_sp_score_3k.py testdata_short_aligned.fa     # Compute score
 ```
 \   
@@ -140,7 +143,7 @@ In the experiments section we were asked to answer the following questions:
 
 ### What is the score of an optimal aligment of the first 3 sequences in brca1-testseqs.fasta (i.e. brca1_bos_taurus, brca1_canis_lupus and brca1_gallus_gallus) as computed by your program sp_exact_3? How does an optimal alignment look like?
 
-To answer this question we extracted the first 3 sequences into a new fasta file and run our exact multiple sequence alignment (MSA) implementation on this file. Generated files are deleted after at the end.
+To answer this question we extracted the first 3 sequences into a new fasta file and run our exact multiple sequence alignment (MSA) implementation on this file. Generated files are deleted at the end.
 
 ```{bash echo=F}
 head -n 12 test_data/brca1-testseqs.fasta > brca1-first3.fasta
@@ -155,11 +158,11 @@ rm brca1-first3.fasta
 
 For visualizing the alignment we took the generated MSA fasta file and we used MView tool from the EMBL-EBI (Figure 1).
 
-![](Figures/brca1_first3_alignment.png)
+![MSA alignment of first 3 sequences in brca1-testseqs.fasta, using an approximate approach. Visualized using MView tool of EMBL-EBI](Figures/brca1_first3_alignment.png)
 
 ### What is the score of the alignment of the first 5 sequences in  brca1-testseqs.fasta (i.e. brca1_bos_taurus, brca1_canis_lupus, brca1_gallus_gallus, brca1_homo_sapiens, and brca1_macaca_mulatta) as computed by your program sp_approx?
 
-Again we extract the first 5 sequences and this time we use the approximate implementation for the MSA. Generated files are deleted at the end.
+Again we extract the first 5 sequences and this time we use the approximate implementation for the MSA. We visualize the obtained MSA file (Figure 2). Generated files are deleted at the end.
 
 ```{bash echo=F}
 head -n 20 test_data/brca1-testseqs.fasta > brca1-first5.fasta
@@ -169,7 +172,7 @@ echo "an approximate approach:"
 python3 msa_sp_score_3k.py aligned_seqs/brca1-first5_aligned.fa
 ```
 
-![](Figures/brca1_first5_alignment.png)
+![MSA alignment of first 5 sequences in brca1-testseqs.fasta, using an approximate approach. Visualized using MView tool of EMBL-EBI](Figures/brca1_first5_alignment.png)
 
 ### Which of the 5 sequences is choosen as the 'center string'?
 
@@ -186,26 +189,26 @@ rm brca1-first5.fasta
 
 ### Make an experiment comparing the scores of the alignments computed by sp_exact_3 and sp_approx that validates that the approximation ratio of sp_approx is 2(k-1)/k for k sequences. i.e 4/3 for three sequences.
 
-You should use the testdata in `testseqs.zip` that contains 20 fasta files (testseqs_10_3.fasta, testseqs_20_3.fasta, ..., testseqs_200_3.fasta) each containing 3 sequences of lengths 10, 20, ..., 200.
-For each triplet of sequences (i.e. each fasta file), you should compute the optimal score of an MSA using sp_exact_3 and the score of the alignment produced by sp_approx. Make a graph in which you plot the ratio of the computed scores for each sequence length. Comment on what you observe.
+**You should use the testdata in `testseqs.zip` that contains 20 fasta files (testseqs_10_3.fasta, testseqs_20_3.fasta, ..., testseqs_200_3.fasta) each containing 3 sequences of lengths 10, 20, ..., 200.
+For each triplet of sequences (i.e. each fasta file), you should compute the optimal score of an MSA using sp_exact_3 and the score of the alignment produced by sp_approx. Make a graph in which you plot the ratio of the computed scores for each sequence length. Comment on what you observe.**
+
+To answer this question we implemented the following shell script:
 
 ```{bash eval=F, echo=T}
 echo -n "" > scores/scores_exact.txt   # Create empty file to store exact scores
 echo -n "" > scores/scores_approx.txt  # Create empty file to store approx. scores
 for seq_triplet in testseqs/* 
 do
-
     ./msa_exact.py score_matrix 5 $seq_triplet > seq_triplet_aligned_exact.fa
     ./msa_approx.py score_matrix 5 $seq_triplet > seq_triplet_aligned_approx.fa
     
     python3 msa_sp_score_3k.py seq_triplet_aligned_exact.fa >> scores/scores_exact.txt
     python3 msa_sp_score_3k.py seq_triplet_aligned_approx.fa >> scores/scores_approx.txt
-
 done
 rm seq_triplet_aligned_exact.fa seq_triplet_aligned_approx.fa
 ```
 
-Plotting the score results we can see:
+Plotting the score results:
 
 ```{r, eval=T, echo=FALSE}
 scores_exact <- read.table("scores/scores_exact.txt", header = F)
