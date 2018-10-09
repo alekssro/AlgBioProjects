@@ -74,23 +74,6 @@ class Alignment:
         self.Ins[i][j] = min(i1, i2)
         return self.Ins[i][j]
 
-    # Returns the sp-score of the MSA stored in the FASTA file 'filename'
-    ###########################################################################
-    def compute_sp_score(self):
-
-        # Compute the score of each induced pairwise alignment
-        score = 0
-        for i in range(len(self.M)):
-            for j in range(i+1, len(self.M)):
-                if len(self.M[i]) != len(self.M[j]):
-                    print("ERROR: Rows", i, "and", j, "have different lengths.")
-                    sys.exit(1)
-                for k in range(len(self.M[i])):
-                    print(self.M[i][k], self.M[j][k])
-                    score = score + self.N[self.M[i][k]][self.M[j][k]]
-
-        return score
-
     def findCenterStr(self):
         sumOfScores = float("inf")
         centerStr = 0
