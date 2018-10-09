@@ -6,7 +6,7 @@ output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, tidy = T, tidy.opts = list(width.cutoff=60))
+knitr::opts_chunk$set(echo = TRUE, comment = NA, tidy = T, tidy.opts = list(width.cutoff=60))
 ```
 
 
@@ -92,21 +92,21 @@ After one or none of these conditions are met, we check the next position in the
 
 ### Tests
 
-To verify the correctness of our programs, we were given two fasta files (`testdata_short.txt` and `testdata_long.txt`) from which we know their expected multiple alignment score. We run our programs and check if the score matches the expected (for the exact approach it should be the same and for the approximate approach it should be equal or higher)
+To verify the correctness of our programs, we were given two fasta files (`testdata_short.txt` and `testdata_long.txt`, in test_data folder) from which we know their expected multiple alignment score. We run our programs and check if the score matches the expected (for the exact approach it should be the same and for the approximate approach it should be equal or higher)
 
 #### Using exact approach
 
 ```{bash echo=F}
 echo "Expected alignment score of sequences in testdata_short.txt: 198"
 echo "Obtained result:"
-./msa_exact.py score_matrix 5 testdata_short.txt > testdata_short_aligned.fa
+./msa_exact.py score_matrix 5 test_data/testdata_short.txt > testdata_short_aligned.fa
 python3 msa_sp_score_3k.py testdata_short_aligned.fa
 ```
 \   
 ```{bash echo=F}
 echo "Expected alignment score of sequences in testdata_long.txt: 1482"
 echo "Obtained result:"
-./msa_exact.py score_matrix 5 testdata_long.txt > testdata_long_aligned.fa
+./msa_exact.py score_matrix 5 test_data/testdata_long.txt > testdata_long_aligned.fa
 python3 msa_sp_score_3k.py testdata_long_aligned.fa
 ```
 
@@ -116,7 +116,7 @@ python3 msa_sp_score_3k.py testdata_long_aligned.fa
 echo "Expected alignment score of sequences in testdata_short.txt: >=198"
 echo "Obtained result:"
 # Get alignment
-./msa_approx.py score_matrix 5 testdata_short.txt > testdata_short_aligned.fa     
+./msa_approx.py score_matrix 5 test_data/testdata_short.txt > testdata_short_aligned.fa     
 python3 msa_sp_score_3k.py testdata_short_aligned.fa     # Compute score
 ```
 \   
@@ -124,7 +124,7 @@ python3 msa_sp_score_3k.py testdata_short_aligned.fa     # Compute score
 echo "Expected alignment score of sequences in testdata_long.txt: >= 1482"
 echo "Obtained result:"
 # Get alignment
-./msa_approx.py score_matrix 5 testdata_long.txt > testdata_long_aligned.fa     
+./msa_approx.py score_matrix 5 test_data/testdata_long.txt > testdata_long_aligned.fa     
 python3 msa_sp_score_3k.py testdata_long_aligned.fa     # Compute score
 
 # Clean generated files
@@ -140,41 +140,45 @@ In the experiments section we were asked to answer the following questions:
 To answer this question we extracted the first 3 sequences into a new fasta file and run our exact multiple sequence alignment (MSA) implementation on this file. Generated files are deleted after at the end.
 
 ```{bash echo=F}
-head -n 12 brca1-testseqs.fasta > brca1-first3.fasta
-echo "Score of an optimal aligment of the first 3 sequences in brca1-testseqs.fasta, using an exact approach:"
-./msa_exact.py score_matrix 5 brca1-first3.fasta > brca1-first3_aligned.fa      # Get alignment
-python3 msa_sp_score_3k.py brca1-first3_aligned.fa      # Calculate score
-echo ""
-echo "Optimal alignment:"
-cat brca1-first3_aligned.fa     # Print alignment
+head -n 12 test_data/brca1-testseqs.fasta > brca1-first3.fasta
+echo "Score of an optimal aligment of the first 3 sequences in brca1-testseqs.fasta, using"
+echo "an exact approach:"
+./msa_exact.py score_matrix 5 brca1-first3.fasta > aligned_seqs/brca1-first3_aligned.fa      # Get alignment
+python3 msa_sp_score_3k.py aligned_seqs/brca1-first3_aligned.fa      # Calculate score
 
 # Clean generated files
-rm brca1-first3_aligned.fa brca1-first3.fasta
+rm brca1-first3.fasta
 ```
+
+For visualizing the alignment we took the generated MSA fasta file and we used MView tool from the EMBL-EBI:
+
+![](Figures/brca1_first3_alignment.png)
 
 ### What is the score of the alignment of the first 5 sequences in  brca1-testseqs.fasta (i.e. brca1_bos_taurus, brca1_canis_lupus, brca1_gallus_gallus, brca1_homo_sapiens, and brca1_macaca_mulatta) as computed by your program sp_approx?
 
 Again we extract the first 5 sequences and this time we use the approximate implementation for the MSA. Generated files are deleted at the end.
 
 ```{bash echo=F}
-head -n 20 brca1-testseqs.fasta > brca1-first5.fasta
-echo "Score of an optimal aligment of the first 5 sequences in brca1-testseqs.fasta, using an approximate approach:"
-./msa_approx.py score_matrix 5 brca1-first5.fasta > brca1-first5_aligned.fa
-python3 msa_sp_score_3k.py brca1-first5_aligned.fa
-echo ""
-echo "Optimal alignment:"
-cat brca1-first5_aligned.fa
+head -n 20 test_data/brca1-testseqs.fasta > brca1-first5.fasta
+echo "Score of an optimal aligment of the first 5 sequences in brca1-testseqs.fasta, using"
+echo "an approximate approach:"
+./msa_approx.py score_matrix 5 brca1-first5.fasta > aligned_seqs/brca1-first5_aligned.fa
+python3 msa_sp_score_3k.py aligned_seqs/brca1-first5_aligned.fa
 ```
+
+![](Figures/brca1_first5_alignment.png)
 
 ### Which of the 5 sequences is choosen as the 'center string'?
 
 The center string is placed in the top position in the alignment in our implementation, therefore, center string:
 
 ```{bash}
-head -n 1 brca1-first5_aligned.fa
+head -n 1 aligned_seqs/brca1-first5_aligned.fa
+```
 
+```{bash echo = F}
 # Clean generated files
-rm brca1-first5_aligned.fa brca1-first5.fasta
+rm brca1-first5.fasta
 ```
 
 ### Make an experiment comparing the scores of the alignments computed by sp_exact_3 and sp_approx that validates that the approximation ratio of sp_approx is 2(k-1)/k for k sequences. i.e 4/3 for three sequences.
@@ -183,16 +187,16 @@ You should use the testdata in `testseqs.zip` that contains 20 fasta files (test
 For each triplet of sequences (i.e. each fasta file), you should compute the optimal score of an MSA using sp_exact_3 and the score of the alignment produced by sp_approx. Make a graph in which you plot the ratio of the computed scores for each sequence length. Comment on what you observe.
 
 ```{bash}
-echo -n "" > scores_exact.txt   # Create empty file to store exact scores
-echo -n "" > scores_approx.txt  # Create empty file to store approx. scores
+echo -n "" > scores/scores_exact.txt   # Create empty file to store exact scores
+echo -n "" > scores/scores_approx.txt  # Create empty file to store approx. scores
 for seq_triplet in testseqs/* 
 do
 
     ./msa_exact.py score_matrix 5 $seq_triplet > seq_triplet_aligned_exact.fa
     ./msa_approx.py score_matrix 5 $seq_triplet > seq_triplet_aligned_approx.fa
     
-    python3 msa_sp_score_3k.py seq_triplet_aligned_exact.fa >> scores_exact.txt
-    python3 msa_sp_score_3k.py seq_triplet_aligned_approx.fa >> scores_approx.txt
+    python3 msa_sp_score_3k.py seq_triplet_aligned_exact.fa >> scores/scores_exact.txt
+    python3 msa_sp_score_3k.py seq_triplet_aligned_approx.fa >> scores/scores_approx.txt
 
 done
 rm seq_triplet_aligned_exact.fa seq_triplet_aligned_approx.fa
