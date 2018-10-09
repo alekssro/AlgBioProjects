@@ -107,28 +107,66 @@ python3 msa_sp_score_3k.py testdata_long_aligned.fa
 ```{bash echo=F}
 echo "Expected alignment score of sequences in testdata_short.txt: >=198"
 echo "Obtained result:"
-./msa_approx.py score_matrix 5 testdata_short.txt > testdata_short_aligned.fa
-python3 msa_sp_score_3k.py testdata_short_aligned.fa
+./msa_approx.py score_matrix 5 testdata_short.txt > testdata_short_aligned.fa     # Get alignment
+python3 msa_sp_score_3k.py testdata_short_aligned.fa     # Compute score
 ```
 \   
 ```{bash echo=F}
 echo "Expected alignment score of sequences in testdata_long.txt: >= 1482"
 echo "Obtained result:"
-./msa_approx.py score_matrix 5 testdata_long.txt > testdata_long_aligned.fa
-python3 msa_sp_score_3k.py testdata_long_aligned.fa
+./msa_approx.py score_matrix 5 testdata_long.txt > testdata_long_aligned.fa     # Get alignment
+python3 msa_sp_score_3k.py testdata_long_aligned.fa     # Compute score
+
+# Clean generated files
+rm testdata_short_aligned.fa testdata_long_aligned.fa
 ```
 
 # Experiments
 
 In the experiments section we were asked to answer the following questions:
 
-What is the score of an optimal aligment of the first 3 sequences in brca1-testseqs.fasta
+### What is the score of an optimal aligment of the first 3 sequences in brca1-testseqs.fasta (i.e. brca1_bos_taurus, brca1_canis_lupus and brca1_gallus_gallus) as computed by your program sp_exact_3? How does an optimal alignment look like?
 
-(i.e. brca1_bos_taurus, brca1_canis_lupus and brca1_gallus_gallus) as computed by your program sp_exact_3? How does an optimal alignment look like?
-What is the score of the alignment of the first 5 sequences in  brca1-testseqs.fasta
+To answer this question we extracted the first 3 sequences into a new fasta file and run our exact multiple sequence alignment (MSA) implementation on this file. Generated files are deleted after at the end.
 
-(i.e. brca1_bos_taurus, brca1_canis_lupus, brca1_gallus_gallus, brca1_homo_sapiens, and brca1_macaca_mulatta) as computed by your program sp_approx?
-Which of the 5 sequences is choosen as the 'center string'?
+```{bash echo=F}
+head -n 12 brca1-testseqs.fasta > brca1-first3.fasta
+echo "Score of an optimal aligment of the first 3 sequences in brca1-testseqs.fasta, using an exact approach:"
+./msa_exact.py score_matrix 5 brca1-first3.fasta > brca1-first3_aligned.fa      # Get alignment
+python3 msa_sp_score_3k.py brca1-first3_aligned.fa      # Calculate score
+echo ""
+echo "Optimal alignment:"
+cat brca1-first3_aligned.fa     # Print alignment
+
+# Clean generated files
+rm brca1-first3_aligned.fa brca1-first3.fasta
+```
+
+### What is the score of the alignment of the first 5 sequences in  brca1-testseqs.fasta (i.e. brca1_bos_taurus, brca1_canis_lupus, brca1_gallus_gallus, brca1_homo_sapiens, and brca1_macaca_mulatta) as computed by your program sp_approx?
+
+Again we extract the first 5 sequences and this time we use the approximate implementation for the MSA. Generated files are deleted at the end.
+
+```{bash echo=F}
+head -n 20 brca1-testseqs.fasta > brca1-first5.fasta
+echo "Score of an optimal aligment of the first 5 sequences in brca1-testseqs.fasta, using an approximate approach:"
+./msa_approx.py score_matrix 5 brca1-first5.fasta > brca1-first5_aligned.fa
+python3 msa_sp_score_3k.py brca1-first5_aligned.fa
+echo ""
+echo "Optimal alignment:"
+cat brca1-first5_aligned.fa
+```
+
+### Which of the 5 sequences is choosen as the 'center string'?
+
+The center string is placed in the top position in the alignment in our implementation, therefore, center string:
+
+```{bash}
+head -n 1 brca1-first5_aligned.fa
+
+# Clean generated files
+rm brca1-first5_aligned.fa brca1-first5.fasta
+```
+
 
 Make an experiment comparing the scores of the alignments computed by sp_exact_3 and sp_approx that validates that the approximation ratio of sp_approx is 2(k-1)/k for k sequences. i.e 4/3 for three sequences.
 
@@ -221,7 +259,7 @@ score of an alignment of seqi and seqj.
 
 Answer:
 
-```{bash}
+```{bash eval=F}
 ./evaluate_global_alignment.sh 0 5
 ```
 
@@ -245,7 +283,7 @@ optimal score of an alignment of seqi and seqj.
 
 Answer:
 
-```{bash}
+```{bash eval=F}
 ./evaluate_global_alignment.sh 5 5
 ```
 
@@ -273,7 +311,7 @@ A bash script was written that measure the time consumption for the algorithm. T
 ```
 
 
-```{r, echo=FALSE}
+```{r, eval=F, echo=FALSE}
 
 times_linear <- read.table("Output/times_linearCost.txt")
 Ns <- times_linear$V1[c(T,F)]
