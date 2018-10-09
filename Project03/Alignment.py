@@ -91,28 +91,31 @@ class Alignment:
 
     def extendM(self, optAlign):
 
-        if not self.M:
+        if not self.M:  # empty alignment matrix (first time we call the matrix)
             self.M = optAlign   # first optimal alignment = M (initialize)
             return
 
         i = 0
         while self.M[0] != optAlign[0]:
+            # The first element of the alignment matrix and the one in the optimal
+            # alignment should be the same in the last iteration
+            if i < len(self.M[0]):  # avoid index out of range (see elif)
 
-            if i < len(self.M[0]):
-
-                if self.M[0][i] == "-":
-                    optAlign[0] = optAlign[0][:i] + '-' + optAlign[0][i:]
-                    optAlign[1] = optAlign[1][:i] + '-' + optAlign[1][i:]
-                elif optAlign[0][i] == "-":
+                if self.M[0][i] == "-":     # finds a gap in the center string (0) in the alignment (M)
+                    optAlign[0] = optAlign[0][:i] + '-' + optAlign[0][i:]   # add gap in optAlign at position i
+                    optAlign[1] = optAlign[1][:i] + '-' + optAlign[1][i:]   # add gap in optAlign at position i
+                elif optAlign[0][i] == "-":     # finds a gap in the center string in the optimal alignment
                     for j in range(len(self.M)):
-                        self.M[j] = self.M[j][:i] + "-" + self.M[j][i:]
+                        self.M[j] = self.M[j][:i] + "-" + self.M[j][i:]     # add gap in all the sequences of the M alignment
 
-                i += 1
             elif optAlign[0][i] == "-":
+                # finds a gap at the end of the OptAlign, meaning optAlign length > M[j]
                 for j in range(len(self.M)):
-                    self.M[j] = self.M[j][:i] + "-" + self.M[j][i:]
+                    self.M[j] = self.M[j][:i] + "-" + self.M[j][i:]     # add gap in all the sequences of the M alignment
 
-        self.M.append(optAlign[1])
+            i += 1
+
+        self.M.append(optAlign[1])  # add new aligned sequence once all changes are done
 
     def multiple_align(self):
         self.centerStr = self.findCenterStr()       # index for the center string
