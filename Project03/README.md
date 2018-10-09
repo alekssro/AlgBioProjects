@@ -210,7 +210,7 @@ rm seq_triplet_aligned_exact.fa seq_triplet_aligned_approx.fa
 
 Plotting the score results:
 
-```{r, eval=T, echo=FALSE}
+```{r, eval=T, echo=FALSE, fig.height = 3, fig.width = 8, fig.align = "center"}
 scores_exact <- read.table("scores/scores_exact.txt", header = F)
 scores_approx <- read.table("scores/scores_approx.txt", header = F)
 
