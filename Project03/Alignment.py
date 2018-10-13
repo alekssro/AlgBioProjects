@@ -3,6 +3,8 @@ import random
 from Bio import SeqIO
 
 # We define a class for the data in the exercise with the methods we will need, in order to access easily to them
+
+
 class Alignment:
 
     N = []  # substitution matrix (given)
@@ -59,21 +61,21 @@ class Alignment:
             return self.gap_params[0] * k + self.gap_params[1]
 
     def subCost(self, X, Y, i, j):
-        return self.N[int(X[i-1])][int(Y[j-1])]
+        return self.N[int(X[i - 1])][int(Y[j - 1])]
 
     def calcD(self, i, j):
         d1 = d2 = float("inf")
-        d1 = self.T[i-1][j] + self.gapcost(1)
+        d1 = self.T[i - 1][j] + self.gapcost(1)
         if (i > 1) and (j >= 0):
-            d2 = self.D[i-1][j] + self.gapcost(0)
+            d2 = self.D[i - 1][j] + self.gapcost(0)
         self.D[i][j] = min(d1, d2)
         return self.D[i][j]
 
     def calcI(self, i, j):
         i1 = i2 = float("inf")
-        i1 = self.T[i][j-1] + self.gapcost(1)
+        i1 = self.T[i][j - 1] + self.gapcost(1)
         if (i >= 0) and (j > 1):
-            i2 = self.Ins[i][j-1] + self.gapcost(0)
+            i2 = self.Ins[i][j - 1] + self.gapcost(0)
         self.Ins[i][j] = min(i1, i2)
         return self.Ins[i][j]
 
@@ -84,7 +86,8 @@ class Alignment:
         for i in range(len(self.seqs_Nums)):
             for j in range(len(self.seqs_Nums)):
                 # if i != j:
-                scores[i][j] = self.affine_align(self.seqs_Nums[i], self.seqs_Nums[j])
+                scores[i][j] = self.affine_align(
+                    self.seqs_Nums[i], self.seqs_Nums[j])
 
             if sum(scores[i]) < sumOfScores:
                 sumOfScores = sum(scores[i])
@@ -94,7 +97,8 @@ class Alignment:
 
     def extendM(self, optAlign):
 
-        if not self.M:  # empty alignment matrix (first time we call the matrix)
+        # empty alignment matrix (first time we call the matrix)
+        if not self.M:
             self.M = optAlign   # first optimal alignment = M (initialize)
             return
 
@@ -104,21 +108,28 @@ class Alignment:
             # alignment should be the same in the last iteration
             if i < len(self.M[0]):  # avoid index out of range (see elif)
 
-                if self.M[0][i] == "-":     # finds a gap in the center string (0) in the alignment (M)
-                    optAlign[0] = optAlign[0][:i] + '-' + optAlign[0][i:]   # add gap in optAlign at position i
-                    optAlign[1] = optAlign[1][:i] + '-' + optAlign[1][i:]   # add gap in optAlign at position i
-                elif optAlign[0][i] == "-":     # finds a gap in the center string in the optimal alignment
+                # finds a gap in the center string (0) in the alignment (M)
+                if self.M[0][i] == "-":
+                    # add gap in optAlign at position i
+                    optAlign[0] = optAlign[0][:i] + '-' + optAlign[0][i:]
+                    # add gap in optAlign at position i
+                    optAlign[1] = optAlign[1][:i] + '-' + optAlign[1][i:]
+                # finds a gap in the center string in the optimal alignment
+                elif optAlign[0][i] == "-":
                     for j in range(len(self.M)):
-                        self.M[j] = self.M[j][:i] + "-" + self.M[j][i:]     # add gap in all the sequences of the M alignment
+                        # add gap in all the sequences of the M alignment
+                        self.M[j] = self.M[j][:i] + "-" + self.M[j][i:]
 
             elif optAlign[0][i] == "-":
                 # finds a gap at the end of the OptAlign, meaning optAlign length > M[j]
                 for j in range(len(self.M)):
-                    self.M[j] = self.M[j][:i] + "-" + self.M[j][i:]     # add gap in all the sequences of the M alignment
+                    # add gap in all the sequences of the M alignment
+                    self.M[j] = self.M[j][:i] + "-" + self.M[j][i:]
 
             i += 1
 
-        self.M.append(optAlign[1])  # add new aligned sequence once all changes are done
+        # add new aligned sequence once all changes are done
+        self.M.append(optAlign[1])
 
     def multiple_align(self):
         self.centerStr = self.findCenterStr()       # index for the center string
@@ -133,7 +144,8 @@ class Alignment:
             if i == self.centerStr:
                 continue
 
-            self.affine_align(self.seqs_Nums[self.centerStr], self.seqs_Nums[i])
+            self.affine_align(
+                self.seqs_Nums[self.centerStr], self.seqs_Nums[i])
             optAlign = self.backtrack_iterative()
             self.extendM(optAlign)
 
@@ -144,29 +156,38 @@ class Alignment:
         A = self.seqs_Nums[0]
         B = self.seqs_Nums[1]
         C = self.seqs_Nums[2]
-        self.T = self.initMatrix3d(len(A)+1, len(B)+1, len(C)+1)
+        self.T = self.initMatrix3d(len(A) + 1, len(B) + 1, len(C) + 1)
 
-        for i in range(len(A)+1):
-            for j in range(len(B)+1):
-                for k in range(len(C)+1):
+        for i in range(len(A) + 1):
+            for j in range(len(B) + 1):
+                for k in range(len(C) + 1):
                     v0 = v1 = v2 = v3 = v4 = v5 = v6 = v7 = float("inf")
-                    if i==0 and j==0 and k==0:
+                    if i == 0 and j == 0 and k == 0:
                         v0 = 0
-                    if i>0 and j>0 and k>0:
-                        v1 = self.T[i-1][j-1][k-1] + self.subCost(A, B, i, j) + \
+                    if i > 0 and j > 0 and k > 0:
+                        v1 = self.T[i - 1][j - 1][k - 1] + self.subCost(A, B, i, j) + \
                             self.subCost(B, C, j, k) + self.subCost(A, C, i, k)
-                    if i>0 and j>0 and k>=0:
-                        v2 = self.T[i-1][j-1][k] + self.subCost(A, B, i, j) + self.gapcost(0) + self.gapcost(0)
-                    if i>0 and j>=0 and k>0:
-                        v3 = self.T[i-1][j][k-1] + self.gapcost(0) + self.subCost(A, C, i, k) + self.gapcost(0)
-                    if i>=0 and j>0 and k>0:
-                        v4 = self.T[i][j-1][k-1] + self.gapcost(0) + self.gapcost(0) + self.subCost(B, C, j, k)
-                    if i>0 and j>=0 and k>=0:
-                        v5 = self.T[i-1][j][k] + self.gapcost(0) + self.gapcost(0)
-                    if i>=0 and j>0 and k>=0:
-                        v6 = self.T[i][j-1][k] + self.gapcost(0) + self.gapcost(0)
-                    if i>=0 and j>=0 and k>0:
-                        v7 = self.T[i][j][k-1] + self.gapcost(0) + self.gapcost(0)
+                    if i > 0 and j > 0 and k >= 0:
+                        v2 = self.T[i - 1][j - 1][k] + \
+                            self.subCost(A, B, i, j) + \
+                            self.gapcost(0) + self.gapcost(0)
+                    if i > 0 and j >= 0 and k > 0:
+                        v3 = self.T[i - 1][j][k - 1] + \
+                            self.gapcost(0) + self.subCost(A, C,
+                                                           i, k) + self.gapcost(0)
+                    if i >= 0 and j > 0 and k > 0:
+                        v4 = self.T[i][j - 1][k - 1] + \
+                            self.gapcost(0) + self.gapcost(0) + \
+                            self.subCost(B, C, j, k)
+                    if i > 0 and j >= 0 and k >= 0:
+                        v5 = self.T[i - 1][j][k] + \
+                            self.gapcost(0) + self.gapcost(0)
+                    if i >= 0 and j > 0 and k >= 0:
+                        v6 = self.T[i][j - 1][k] + \
+                            self.gapcost(0) + self.gapcost(0)
+                    if i >= 0 and j >= 0 and k > 0:
+                        v7 = self.T[i][j][k - 1] + \
+                            self.gapcost(0) + self.gapcost(0)
 
                     self.T[i][j][k] = min(v0, v1, v2, v3, v4, v5, v6, v7)
 
@@ -183,65 +204,65 @@ class Alignment:
         k = len(self.T[0][0]) - 1
         while (i > 0 or j > 0 or k > 0):
 
-            if (i > 0 and j > 0 and k > 0) and (self.T[i][j][k] == self.T[i-1][j-1][k-1] +
-                    self.subCost(A, B, i, j) + self.subCost(B, C, j, k) + self.subCost(A, C, i, k)):
+            if (i > 0 and j > 0 and k > 0) and (self.T[i][j][k] == self.T[i - 1][j - 1][k - 1] +
+                                                self.subCost(A, B, i, j) + self.subCost(B, C, j, k) + self.subCost(A, C, i, k)):
                 # No GAPS
-                a = A[i-1] + a
-                b = B[j-1] + b
-                c = C[k-1] + c
+                a = A[i - 1] + a
+                b = B[j - 1] + b
+                c = C[k - 1] + c
                 i -= 1
                 j -= 1
                 k -= 1
-            elif (i > 0 and j > 0 and k >= 0) and (self.T[i][j][k] == self.T[i-1][j-1][k] +
-                    self.subCost(A, B, i, j) + self.gapcost(0) + self.gapcost(0)):
+            elif (i > 0 and j > 0 and k >= 0) and (self.T[i][j][k] == self.T[i - 1][j - 1][k] +
+                                                   self.subCost(A, B, i, j) + self.gapcost(0) + self.gapcost(0)):
                 # Gap in C
-                a = A[i-1] + a
-                b = B[j-1] + b
+                a = A[i - 1] + a
+                b = B[j - 1] + b
                 c = ("-") + c
                 i -= 1
                 j -= 1
 
-            elif (i>0 and j>=0 and k>0) and (self.T[i][j][k] == self.T[i-1][j][k-1] + self.gapcost(0) +
-                    self.subCost(A, C, i, k) + self.gapcost(0)):
+            elif (i > 0 and j >= 0 and k > 0) and (self.T[i][j][k] == self.T[i - 1][j][k - 1] + self.gapcost(0) +
+                                                   self.subCost(A, C, i, k) + self.gapcost(0)):
                 # Gap in B
-                a = A[i-1] + a
+                a = A[i - 1] + a
                 b = ("-") + b
-                c = C[k-1] + c
+                c = C[k - 1] + c
                 i -= 1
                 k -= 1
 
-            elif (i>=0 and j>0 and k>0) and (self.T[i][j][k] == self.T[i][j-1][k-1] + self.gapcost(0) +
-                    self.gapcost(0) + self.subCost(B, C, j, k)):
+            elif (i >= 0 and j > 0 and k > 0) and (self.T[i][j][k] == self.T[i][j - 1][k - 1] + self.gapcost(0) +
+                                                   self.gapcost(0) + self.subCost(B, C, j, k)):
                 # Gap in A
                 a = ("-") + a
-                b = B[j-1] + b
-                c = C[k-1] + c
+                b = B[j - 1] + b
+                c = C[k - 1] + c
                 j -= 1
                 k -= 1
 
-            elif(i > 0 and j >= 0 and k >= 0) and (self.T[i][j][k] == self.T[i-1][j][k] +
-                    self.gapcost(0) + self.gapcost(0)):
+            elif(i > 0 and j >= 0 and k >= 0) and (self.T[i][j][k] == self.T[i - 1][j][k] +
+                                                   self.gapcost(0) + self.gapcost(0)):
                 # Gap in B and C
-                a = A[i-1] + a
+                a = A[i - 1] + a
                 b = ("-") + b
                 c = ("-") + c
                 i -= 1
 
-            elif(i>=0 and j>0 and k>=0) and (self.T[i][j][k] == self.T[i][j-1][k] +
-                    self.gapcost(0) + self.gapcost(0)):
+            elif(i >= 0 and j > 0 and k >= 0) and (self.T[i][j][k] == self.T[i][j - 1][k] +
+                                                   self.gapcost(0) + self.gapcost(0)):
 
                 # Gap in A and C
                 a = ("-") + a
-                b = B[j-1] + b
+                b = B[j - 1] + b
                 c = ("-") + c
                 j -= 1
 
-            elif(i >= 0 and j >= 0 and k > 0) and (self.T[i][j][k] == self.T[i][j][k-1] +
-                    self.gapcost(0) + self.gapcost(0)):
+            elif(i >= 0 and j >= 0 and k > 0) and (self.T[i][j][k] == self.T[i][j][k - 1] +
+                                                   self.gapcost(0) + self.gapcost(0)):
                 # Gap in A and B
                 a = ("-") + a
                 b = ("-") + b
-                c = C[k-1] + c
+                c = C[k - 1] + c
                 k -= 1
 
         return a, b, c
@@ -260,7 +281,8 @@ class Alignment:
                 v1 = v2 = v3 = float("inf")
 
                 if (i > 0) and (j > 0):     # Diagonal arrow
-                    v1 = self.T[i-1][j-1] + self.N[int(self.A[i-1])][int(self.B[j-1])]
+                    v1 = self.T[i - 1][j - 1] + \
+                        self.N[int(self.A[i - 1])][int(self.B[j - 1])]
                 if (i > 0) and (j >= 0):    # Vertical arrow
                     v2 = self.calcD(i, j)
                 if (i >= 0) and (j > 0):    # Horizontal arrow
@@ -277,29 +299,29 @@ class Alignment:
         a = b = ''
         i = len(self.T) - 1
         j = len(self.T[0]) - 1
-        while (i>0 or j>0):
-            if (i > 0 and j > 0) and (self.T[i][j] == self.T[i-1][j-1] + self.N[int(self.A[i-1])][int(self.B[j-1])]):
+        while (i > 0 or j > 0):
+            if (i > 0 and j > 0) and (self.T[i][j] == self.T[i - 1][j - 1] + self.N[int(self.A[i - 1])][int(self.B[j - 1])]):
                 # optimal alignment of A[1..i] and B[1..j] ends in a sub-column
-                a = self.A[i-1] + a
-                b = self.B[j-1] + b
+                a = self.A[i - 1] + a
+                b = self.B[j - 1] + b
                 i -= 1
                 j -= 1
             else:
                 # optimal alignment of A[1..i] and B[1..j] ends in a del- or in-block
                 k = 1
                 while True:
-                    if (i >= k) and self.T[i][j] == self.T[i-k][j] + self.gapcost(k):
+                    if (i >= k) and self.T[i][j] == self.T[i - k][j] + self.gapcost(k):
                         # optimal alignment of A[1..i] and B[1..j] ends in del-block of length k
                         # “output columns (A[i] A[i-1] … A[i-k+1], -- … --)”
-                        a = self.A[i-k:i] + a
-                        b = ("-"*k) + b
+                        a = self.A[i - k:i] + a
+                        b = ("-" * k) + b
                         i = i - k
                         break
-                    elif (j >= k) and self.T[i][j] == self.T[i][j-k] + self.gapcost(k):
+                    elif (j >= k) and self.T[i][j] == self.T[i][j - k] + self.gapcost(k):
                         # optimal alignment of A[1..i] and B[1..j] ends in a in-block of length k
                         # “output columns (-- … --, B[j]B[j-1] … B[j-k+1])”
-                        a = ("-"*k) + a
-                        b = self.B[j-k:j] + b
+                        a = ("-" * k) + a
+                        b = self.B[j - k:j] + b
                         j = j - k
                         break
                     else:
@@ -316,6 +338,7 @@ class Alignment:
         self.b = self.num_to_sequence(self.b)
         self.c = self.num_to_sequence(self.c)
 
+
 class GetArguments:
 
     argList = []
@@ -328,7 +351,7 @@ class GetArguments:
     def __init__(self, argList):
 
         self.output = False
-        if argList[len(argList)-1] == "-o":
+        if argList[len(argList) - 1] == "-o":
             self.output = True
         self.argList = argList  # get class input (list of arguments provided)
 
@@ -379,20 +402,23 @@ class GetArguments:
 
     def readScoreMatrix(self, infile):
 
-        lines = [line.rstrip('\n') for line in open(infile)]    # lines to elements in list
+        lines = [line.rstrip('\n') for line in open(
+            infile)]    # lines to elements in list
         words = []
         for line in lines:
-            words.append(line.split())          # devide the lines into characters
+            # devide the lines into characters
+            words.append(line.split())
 
         self.n_chr = int(words[0][0])
 
         # initialize score matrix to fill
-        score_matrix = [[0 for i in range(self.n_chr)] for j in range(self.n_chr)]  # inizilize score matrix
+        score_matrix = [[0 for i in range(self.n_chr)] for j in range(
+            self.n_chr)]  # inizilize score matrix
 
         # safe different characters in self.characters and score_matrix
-        for i in range(1, self.n_chr+1):
+        for i in range(1, self.n_chr + 1):
             self.characters.append(words[i][0])
-            for j in range(1, self.n_chr+1):
-                score_matrix[i-1][j-1] = int(words[i][j])
+            for j in range(1, self.n_chr + 1):
+                score_matrix[i - 1][j - 1] = int(words[i][j])
 
         return score_matrix
