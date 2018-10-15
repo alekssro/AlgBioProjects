@@ -1,11 +1,23 @@
 class FiloTree:
-    # TODO: Define methods needed for the project
-    def __init__(self, arg):
+
+    # TODO: Define methods needed for calculating the distance
+    def __init__(self, tree1, tree2):
+        self.tree1 = tree1
+        self.tree2 = tree2
+
+    def dist(self):
         pass
 
 
 class GetArguments:
 
-    # TODO: Define methods needed to read arguments
-    def __init__(self, arg):
+    def __init__(self, argList):
+        self.argList = argList
+
+    def checkArgs(self, arg):
+        # TODO: implement checkArgs
+        pass
+
+    def readTree(self, arg):
+        # TODO: implement readTree
         pass
