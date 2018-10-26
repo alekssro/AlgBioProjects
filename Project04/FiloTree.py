@@ -6,6 +6,7 @@ class FiloTree:
     tree1 = None
     tree2 = None
     distance = float("Inf")
+    leaf2num = {}
 
     def __init__(self, tree1, tree2):
         self.tree1 = tree1
@@ -20,11 +21,25 @@ class FiloTree:
         pass
 
     # TODO: method for rooting a tree at a defined leaf
-    # TODO: method for numbering each leaf in T1 Depth-First
-    # TODO: method for associating leaves in T2 with the numbering done in T1
+    def rootTree(self, arg):
+        pass
+
+    def numerDF(self):
+        # method for numbering each leaf in T1; Depth-First search
+        num = 0
+        for clade in self.tree1.find_clades(order='preorder'):
+            if clade.name:
+                num += 1
+                self.leaf2num[clade.name] = num
+
     # TODO: method for annotating internal nodes with interval (numbering)
     #       if “max – min + 1 = size” then it is an interval, potential candidate
+    def getIntervals(self, arg):
+        pass
+
     # TODO: method to identify shared intervals
+    def sort_count(self, arg):
+        pass
 
 class GetArguments:
 
