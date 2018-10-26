@@ -15,14 +15,20 @@
 # Needed libraries
 from FiloTree import GetArguments
 from FiloTree import FiloTree
-from Bio import Phylo
 import sys
 
-# Get arguments:
+# Read arguments:
 arguments = GetArguments(sys.argv)
 
-tree1 = arguments.trees1[0]
-tree2 = arguments.trees2[0]
+tree1 = arguments.trees1
+tree2 = arguments.trees2
+
+for clade in tree1.find_clades(order='level'):
+    for child in clade:
+        print(clade)
+        print(child)
+    print("")
+
 
 # Get distance
 Trees = FiloTree(tree1, tree2)
