@@ -26,6 +26,4 @@ tree2 = arguments.trees2
 # Get distance
 Trees = FiloTree(tree1, tree2)
 
-Trees.numerDF()
-
-Trees.dist()
+distance = Trees.distance

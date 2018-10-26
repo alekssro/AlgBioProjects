@@ -1,6 +1,7 @@
 from Bio import Phylo
 import sys
 
+
 class FiloTree:
 
     tree1 = None
@@ -18,28 +19,36 @@ class FiloTree:
         self.distance = self.dist()
 
     def dist(self):
-        pass
+        self.rootTrees()
+        self.numerDF()
+        self.getIntervals()
 
-    # TODO: method for rooting a tree at a defined leaf
-    def rootTree(self, arg):
-        pass
+    def rootTrees(self):
+        for clade in self.tree1.find_clades():
+            if clade.name:
+                root = clade.name   # save first leaf as root
+                break
+        self.tree1.root_with_outgroup(root)     # root tree1
+        self.tree2.root_with_outgroup(root)     # root tree2
+        print(root)
 
     def numerDF(self):
         # method for numbering each leaf in T1; Depth-First search
         num = 0
-        for clade in self.tree1.find_clades(order='preorder'):
+        for clade in self.tree1.find_clades():
             if clade.name:
                 num += 1
                 self.leaf2num[clade.name] = num
 
     # TODO: method for annotating internal nodes with interval (numbering)
     #       if “max – min + 1 = size” then it is an interval, potential candidate
-    def getIntervals(self, arg):
+    def getIntervals(self):
         pass
 
     # TODO: method to identify shared intervals
     def sort_count(self, arg):
         pass
+
 
 class GetArguments:
 
