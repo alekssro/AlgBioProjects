@@ -21,7 +21,8 @@ class FiloTree:
     def dist(self):
         self.rootTrees()
         self.numerDF()
-        self.getIntervals()
+        self.getIntervals(self.tree1)
+        self.getIntervals(self.tree2)
 
     def rootTrees(self):
         for clade in self.tree1.find_clades():
@@ -42,8 +43,10 @@ class FiloTree:
 
     # TODO: method for annotating internal nodes with interval (numbering)
     #       if “max – min + 1 = size” then it is an interval, potential candidate
-    def getIntervals(self):
-        pass
+    def getIntervals(self, tree):
+        for clade in tree.find_clades():
+            if clade.name:
+                print(self.leaf2num[clade.name])    # shows order of the leaves for the tree
 
     # TODO: method to identify shared intervals
     def sort_count(self, arg):
