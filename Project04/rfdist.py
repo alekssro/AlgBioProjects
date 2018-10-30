@@ -20,10 +20,11 @@ import sys
 # Read arguments:
 arguments = GetArguments(sys.argv)
 
-tree1 = arguments.trees1
-tree2 = arguments.trees2
+tree1 = arguments.tree1
+tree2 = arguments.tree2
 
 # Get distance
 Trees = FiloTree(tree1, tree2)
 
 distance = Trees.distance
+print(distance)
