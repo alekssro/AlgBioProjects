@@ -45,8 +45,6 @@ class FiloTree:
                 num += 1
                 self.leaf2num[clade.name] = num
 
-    # TODO: method for annotating internal nodes with interval (numbering)
-    #       if “max – min + 1 = size” then it is an interval, potential candidate
     def getIntervals(self, tree):
         intervals = []
         for clade in tree.find_clades():
@@ -71,7 +69,6 @@ class FiloTree:
             if all_sorted[i] == all_sorted[i+1]:
                 shared += 1
 
-        print(len(all_sorted), shared, self.non_intervals)
         d = len(all_sorted) - 2 * shared + self.non_intervals
         return d
 
