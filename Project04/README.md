@@ -17,13 +17,13 @@ library(tidyverse)
 
 
 
-#Introduction
+# Introduction
 
 This project is about comparing evolutionary trees constructed using the Neighbor Joining (NJ) methods, QuickNJ and RapidNJ on different datasets. We implemented an algorithm, based on Days algorithm, for computing the RF distance between two unrooted evolutionary trees over the same set of species and use this implementation in different experiments explained in further detail in the section Experiments. 
 
 
 
-#Methods 
+# Methods 
 
 The algortihm follows the general design of Days algorithm and once we identified the shared splits and the unique splits, we calculated the rf-distance the following way:
 
@@ -47,21 +47,21 @@ Arguments:
 
 
 
-#Evaluation test case for the program rfdist. 
+# Evaluation test case for the program rfdist. 
 The correctness of the algorithm we implemented were tested by running the algorithm with to test trees from the folder testdata, which where provided as a part of the project description. The correst answer for the RF-distance between these to trees should be 8. This was indeed the same result we found when running the algorithm which indicat that we inplemented the algorithm correctly.       
 
 
 
-#References to alignments and trees 
+# References to alignments and trees 
 References to the 8 alignments (in Stockholm-format) and trees (in Newick-format) that we have produced in Experiment 1 and 2:
 
 
 - [Alignments (https://github.com/alekssro/AlgBioProjects/tree/master/Project04/Data/Alignments/)](https://github.com/alekssro/AlgBioProjects/tree/master/Project04/Data/Alignments/)
 - [Trees for Experiment 1 and 2 (https://github.com/alekssro/AlgBioProjects/tree/master/Project04/Data/Trees)](https://github.com/alekssro/AlgBioProjects/tree/master/Project04/Data/Trees)
 
-#Experiments
+# Experiments
 
-###Experiment 1
+### Experiment 1
 
 For each alignment method (Clustal Omega, Kalign, MAFFT, MUSCLE), you build a NJ tree using QuickTree and RapidNJ, and compute the RF-distance between each combination of these eight tree. The outcome of your experiment, is an 8x8 table showing the RF-distance between each pair of constructed trees.
 
@@ -84,7 +84,7 @@ MUS_R   246 242 248 212 252 210 192 0
 
 From this experiment we can see that in general, the differences between the trees built using rapidnj are bigger than the differences between the trees built with quicktree. It is also interesting that the differences between the trees depends more on the NJ method used rather than the multiple alignment algorithm. 
 
-###Experiment 2
+### Experiment 2
 
 Redo the above experiment where you use 395 input sequences in  patbase_aibtas_permuted.fasta. This yields another 8x8 table. 
 
@@ -109,7 +109,7 @@ MUS_R   216 246 242 252 230 184 208 0
 The results in this experiment are pretty similar to the ones seen in the experiment 1. Futhermore we can see that rf-distances is different than the non-permuted which should be the case.
 
 
-###Experiment 3
+### Experiment 3
 
 Compute the RF-distance between the trees produced in 'Experiment 1' and 'Experiment 2' using the same alignment and tree reconstruction method. This yields 8 distances.
 
@@ -129,7 +129,7 @@ Using the same alignment and tree contruction method, permutation seems to have 
 
 
 
-###Experiment 5
+### Experiment 5
 
 Make an experiment that shows the running time of your implementation of rfdist. You must choose test data your self. If the running time is not linear, you should explain why.
 
