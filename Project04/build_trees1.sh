@@ -1,7 +1,7 @@
 #!/bin/bash
 # Script to create trees using quicktree and rapidNJ from the multiple alignments in Data/Alignments/
 
-for alignm in Data/Alignments/*
+for alignm in Data/Alignments/Normal/*
 do
     filename=$(basename -- "$alignm")
     filename="${filename%.*}"
@@ -9,7 +9,7 @@ do
     ./Programs/quicktree_1.1/bin/quicktree $alignm > "Data/Trees/${filename}_quicktree.newick"
 done
 
-for alignm in Data/Alignments/*
+for alignm in Data/Alignments/Normal/*
 do
     filename=$(basename -- "$alignm")
     filename="${filename%.*}"
