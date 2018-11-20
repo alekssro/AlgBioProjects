@@ -1,0 +1,124 @@
+# from Bio import Phylo
+
+
+class NJtree(object):
+    """Methods for constructing a NJ tree"""
+
+    dist_matrix = []
+    taxa_names = []
+    N = []
+    tree = []
+
+    def __init__(self, dist_matrix, taxa_names):
+
+        self.dist_matrix = dist_matrix
+        self.taxa_names = taxa_names
+
+        self.buildNJ()
+
+    def buildNJ(self):
+
+        while len(self.dist_matrix) > 3:
+
+            # Get closest pair
+            pair = self.getClosestPair()
+            i, j = pair
+
+            w_i = 1/2 * (self.dist_matrix[i][j] + self.calc_ri(i) - self.calc_ri(j))
+            w_j = 1/2 * (self.dist_matrix[i][j] + self.calc_ri(j) - self.calc_ri(i))
+
+            self.updateDist_matrix(i, j)
+
+
+            break
+
+    def updateDist_matrix(self, i, j):
+
+        # Calculate new row/column distance
+        d_k = []
+        for m in range(len(self.dist_matrix)):
+            if m != i and m != j:
+                dist = 1/2 * (self.dist_matrix[i][m] + self.dist_matrix[j][m] - self.dist_matrix[i][j])
+                d_k.append(dist)
+
+        # Remove i and j rows/columns
+        # Remove rows
+        del self.dist_matrix[max(i, j)]
+        del self.dist_matrix[min(i, j)]
+
+        # Remove columns
+        for m in range(len(self.dist_matrix)):
+            del self.dist_matrix[m][max(i, j)]
+            del self.dist_matrix[m][min(i, j)]
+            self.dist_matrix[m].append(d_k[m])
+
+        # Add new row
+        d_k.append(0)
+        self.dist_matrix.append(d_k)
+
+    def getClosestPair(self):
+
+        # inizilize N matrix
+        N = [[0 for column in range(len(self.dist_matrix))]
+             for row in range(len(self.dist_matrix[0]))]
+        min_val = float("inf")
+        min_indexes = [0, 0]
+
+        for i in range(len(N)):
+            for j in range(len(N[i])):
+                N[i][j] = self.dist_matrix[i][j] - (self.calc_ri(i) + self.calc_ri(j))
+
+                if i != j and N[i][j] < min_val:
+                    min_val = N[i][j]
+                    min_indexes = [i, j]
+
+        return min_indexes
+
+    def calc_ri(self, i):
+
+        r = (1 / (len(self.dist_matrix) - 2)) * sum(self.dist_matrix[i])
+
+        return r
+
+
+class ReadPhylip:
+    """Extracts information from a phylip format file
+    Input: Phylip-format file name
+    Places the matrix values in 'phylip_matrix' and the names in 'characters'"""
+
+    argList = []
+    phylip_matrix = []
+    n_chr = 0       # number of different characters in the score matrix
+    characters = []
+
+    def __init__(self, argList):
+
+        # self.output = False
+        # if argList[len(argList) - 1] == "-o":
+        #     self.output = True
+        self.argList = argList  # get class input (list of arguments provided)
+
+        self.phylip_matrix = self.readPhylipMatrix(argList[1])
+
+    def readPhylipMatrix(self, infile):
+
+        lines = [line.rstrip('\n') for line in open(
+            infile)]    # lines to elements in list
+        words = []
+        for line in lines:
+            # devide the lines into characters
+            words.append(line.split())
+
+        self.n_chr = int(words[0][0])
+
+        # initialize score matrix to fill
+        phylip_matrix = [[0 for i in range(self.n_chr)] for j in range(
+            self.n_chr)]  # inizilize score matrix
+
+        # safe different characters in self.characters and phylip_matrix
+        for i in range(1, self.n_chr + 1):
+            self.characters.append(words[i][0])
+            for j in range(1, self.n_chr + 1):
+                phylip_matrix[i - 1][j - 1] = float(words[i][j])
+
+        return phylip_matrix
