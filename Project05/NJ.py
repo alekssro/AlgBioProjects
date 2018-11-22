@@ -8,6 +8,8 @@ class NJtree(object):
     taxa_names = []
     N = []
     tree = []
+    nodes = []
+    clades = {}
 
     def __init__(self, dist_matrix, taxa_names):
 
@@ -24,13 +26,36 @@ class NJtree(object):
             pair = self.getClosestPair()
             i, j = pair
 
-            w_i = 1/2 * (self.dist_matrix[i][j] + self.calc_ri(i) - self.calc_ri(j))
-            w_j = 1/2 * (self.dist_matrix[i][j] + self.calc_ri(j) - self.calc_ri(i))
-
+            self.addNode(i, j)
             self.updateDist_matrix(i, j)
 
+            name_i = self.taxa_names.pop(max(i, j))
+            name_j = self.taxa_names.pop(min(i, j))
+            # self.clades[name_i + name_j] = [self.taxa_names[i], w_i, self.taxa_names[j], w_j]
+            self.taxa_names.append(name_i + name_j)
 
-            break
+        v_i = 1/2 * (self.dist_matrix[0][1] + self.dist_matrix[0][2] - self.dist_matrix[1][2])
+        v_j = 1/2 * (self.dist_matrix[1][0] + self.dist_matrix[1][2] - self.dist_matrix[0][2])
+        v_m = 1/2 * (self.dist_matrix[2][0] + self.dist_matrix[2][1] - self.dist_matrix[0][1])
+
+        self.nodes.append([self.taxa_names[0], v_i])    # Node v, i
+        self.nodes.append([self.taxa_names[1], v_j])    # Node v, j
+        self.nodes.append([self.taxa_names[2], v_m])    # Node v, m
+        print(self.clades)
+
+    def addNode(self, i, j):
+
+        w_i = 1/2 * (self.dist_matrix[i][j] + self.calc_ri(i) - self.calc_ri(j))
+        w_j = 1/2 * (self.dist_matrix[i][j] + self.calc_ri(j) - self.calc_ri(i))
+
+        leave_1 = self.taxa_names[i] + ": " + str(w_i)
+        leave_2 = self.taxa_names[j] + ": " + str(w_j)
+
+        if self.taxa_names[i] in self.clades:
+            self.nodes.append([self.taxa_names[i], w_i, self.taxa_names[j], w_j])
+        self.clades[self.taxa_names[i] + self.taxa_names[j]] = [leave_1, leave_2]
+
+
 
     def updateDist_matrix(self, i, j):
 
