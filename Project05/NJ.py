@@ -7,8 +7,7 @@ class NJtree(object):
     dist_matrix = []
     taxa_names = []
     N = []
-    tree = []
-    nodes = []
+    tree = ''
     clades = {}
 
     def __init__(self, dist_matrix, taxa_names):
@@ -29,33 +28,65 @@ class NJtree(object):
             self.addNode(i, j)
             self.updateDist_matrix(i, j)
 
-            name_i = self.taxa_names.pop(max(i, j))
-            name_j = self.taxa_names.pop(min(i, j))
-            # self.clades[name_i + name_j] = [self.taxa_names[i], w_i, self.taxa_names[j], w_j]
+            name_j = self.taxa_names.pop(j)
+            name_i = self.taxa_names.pop(i)
+
             self.taxa_names.append(name_i + name_j)
 
-        v_i = 1/2 * (self.dist_matrix[0][1] + self.dist_matrix[0][2] - self.dist_matrix[1][2])
-        v_j = 1/2 * (self.dist_matrix[1][0] + self.dist_matrix[1][2] - self.dist_matrix[0][2])
-        v_m = 1/2 * (self.dist_matrix[2][0] + self.dist_matrix[2][1] - self.dist_matrix[0][1])
+        self.addFinalNode()
 
-        self.nodes.append([self.taxa_names[0], v_i])    # Node v, i
-        self.nodes.append([self.taxa_names[1], v_j])    # Node v, j
-        self.nodes.append([self.taxa_names[2], v_m])    # Node v, m
-        print(self.clades)
+    def addFinalNode(self):
+
+        v_i = 1 / 2 * (self.dist_matrix[0][1] + self.dist_matrix[0][2] - self.dist_matrix[1][2])
+        v_j = 1 / 2 * (self.dist_matrix[1][0] + self.dist_matrix[1][2] - self.dist_matrix[0][2])
+        v_m = 1 / 2 * (self.dist_matrix[2][0] + self.dist_matrix[2][1] - self.dist_matrix[0][1])
+
+        if self.taxa_names[0] in self.clades:
+            clade_1 = self.clades[self.taxa_names[0]] + ":" + str(v_i)
+        else:
+            clade_1 = self.taxa_names[0] + ":" + str(v_i)
+
+        if self.taxa_names[1] in self.clades:
+            clade_2 = self.clades[self.taxa_names[1]] + ":" + str(v_j)
+        else:
+            clade_2 = self.taxa_names[1] + ":" + str(v_j)
+
+        if self.taxa_names[2] in self.clades:
+            clade_3 = self.clades[self.taxa_names[2]] + ":" + str(v_m)
+        else:
+            clade_3 = self.taxa_names[2] + ":" + str(v_m)
+
+        self.tree = "(" + clade_1 + "," + clade_2 + "," + clade_3 + ")" + ";"
 
     def addNode(self, i, j):
 
-        w_i = 1/2 * (self.dist_matrix[i][j] + self.calc_ri(i) - self.calc_ri(j))
-        w_j = 1/2 * (self.dist_matrix[i][j] + self.calc_ri(j) - self.calc_ri(i))
+        w_i = 1 / 2 * (self.dist_matrix[i][j] + self.calc_ri(i) - self.calc_ri(j))
+        w_j = 1 / 2 * (self.dist_matrix[i][j] + self.calc_ri(j) - self.calc_ri(i))
 
-        leave_1 = self.taxa_names[i] + ": " + str(w_i)
-        leave_2 = self.taxa_names[j] + ": " + str(w_j)
+        leave_1 = self.taxa_names[i] + ":" + str(w_i)
+        leave_2 = self.taxa_names[j] + ":" + str(w_j)
 
-        if self.taxa_names[i] in self.clades:
-            self.nodes.append([self.taxa_names[i], w_i, self.taxa_names[j], w_j])
-        self.clades[self.taxa_names[i] + self.taxa_names[j]] = [leave_1, leave_2]
+        if self.taxa_names[i] in self.clades and self.taxa_names[j] in self.clades:
 
+            self.clades[self.taxa_names[i] + self.taxa_names[j]] = "(" + self.clades[self.taxa_names[i]] + "):" + str(
+                w_i) + "(" + self.clades[self.taxa_names[j]] + "):" + str(w_j)
+            del self.clades[self.taxa_names[i]]
+            del self.clades[self.taxa_names[j]]
 
+        elif self.taxa_names[i] in self.clades:
+
+            self.clades[self.taxa_names[i] + self.taxa_names[j]] = "(" + self.clades[self.taxa_names[i]] + "):" + str(
+                w_i) + leave_2 + ")"
+            del self.clades[self.taxa_names[i]]
+
+        elif self.taxa_names[j] in self.clades:
+
+            self.clades[self.taxa_names[i] + self.taxa_names[j]] = "(" + self.clades[self.taxa_names[j]] + "):" + str(
+                w_j) + "," + leave_1 + ")"
+            del self.clades[self.taxa_names[j]]
+
+        else:
+            self.clades[self.taxa_names[i] + self.taxa_names[j]] = "(" + leave_1 + "," + leave_2 + ")"
 
     def updateDist_matrix(self, i, j):
 
@@ -63,7 +94,9 @@ class NJtree(object):
         d_k = []
         for m in range(len(self.dist_matrix)):
             if m != i and m != j:
-                dist = 1/2 * (self.dist_matrix[i][m] + self.dist_matrix[j][m] - self.dist_matrix[i][j])
+                dist = 1 / 2 * \
+                    (self.dist_matrix[i][m] + self.dist_matrix[j]
+                     [m] - self.dist_matrix[i][j])
                 d_k.append(dist)
 
         # Remove i and j rows/columns
@@ -91,7 +124,8 @@ class NJtree(object):
 
         for i in range(len(N)):
             for j in range(len(N[i])):
-                N[i][j] = self.dist_matrix[i][j] - (self.calc_ri(i) + self.calc_ri(j))
+                N[i][j] = self.dist_matrix[i][j] - \
+                    (self.calc_ri(i) + self.calc_ri(j))
 
                 if i != j and N[i][j] < min_val:
                     min_val = N[i][j]

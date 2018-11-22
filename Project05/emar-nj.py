@@ -21,9 +21,8 @@ arguments = ReadPhylip(sys.argv)
 
 dist_matrix = arguments.phylip_matrix
 taxa = arguments.characters
-print(taxa)
 
 # Build NJ tree
 Tree = NJtree(dist_matrix, taxa)
 
-print(Tree)
+print(Tree.tree)
