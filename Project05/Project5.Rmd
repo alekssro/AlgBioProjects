@@ -1,0 +1,165 @@
+---
+title: "Project 5 - AiB"
+author: "Alejandro Roca and Emil Maag"
+date: "November 20, 2018"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F, warning = F,message = F)
+```
+
+```{r}
+
+library(tidyverse)
+```
+
+
+#Introduction
+
+This project is about making an efficient implementation of the neighbor-joining (NJ) algorithm. We implemented an algorithm, based on Saitou and Nei's algorithm, for computing neighbor-joining trees from a given distance matrix. Furthermore, we used this implementation of the algorithm in different experiments explained in further detail in the section Experiments. 
+
+
+
+#Methods 
+
+The algortihm follows the general design of Saitou and Nei's neighbor-joining algorithm, except for the following changes described below: 
+We defined a dictionary outside of the while loop, which we could access and update in every iteration in the loop. This made it possible to build and store the tree in the dictionary, in a way that made it easy to output the final tree as newick format. For greater detail the code for building and storing the tree in the dictionary can be found as the function addNode(). Only the leaves that form clades were stored in the dictionary, which meant that when terminating the loop, the "final node" had to be added and the weights for the three edges going to the final node had to be calculated. The code for this can be found as the function addFinalNode() in the code appendix. The result of this function outputs the final tree in newick format.   
+
+ 
+
+The following example shows how to use our implementation of the neigbor-joining algorithm from the command line:   
+
+### emar-nj.py distance_matrix 
+
+The arguments in more detail:
+
+Arguments:
+
+- distance_matrix : a distance matrix in phylip-format. 
+
+
+output: a tree in newick format. 
+
+
+
+#Evaluation test case for our implementation of the neighbor joining algorithm
+
+The file example_slide4.phy contains the distance matrix (in phylip-format) from slide 4 in the slides about tree reconstruction. With this matrix as input, our program should produce the tree that is shown below. ... #<----------------------!
+
+
+
+
+
+
+And seen from the our plot below here, these to trees are identical ... #<---------- !
+
+    
+
+
+#A description of our implementation of nj
+
+explaining what you have done in order to make it as efficient as possible, including which programming language(s) you have used.
+
+The following explains the expected running times of each step in Saitou and Nei's neighbor joining algorithm:
+
+Initilization: O(n)
+
+n iterations each taking:
+
+###Step 1: 
+
+- Computing the row sum r i for every i takes O(n^2) time.
+
+- Computing the matrix N takes O(n^2) time.
+
+- Finding the minimum n_ij takes O(n^2) time.
+
+###Step 2:
+
+- Adding node k takes O(1) time
+
+###Step 3:
+
+- Adding two edges takes O(1) time
+
+###Step 4:
+
+Updating the distance matrix takes O(n) time
+
+###Total running time should therefore be O(n^3) for our algorithm.
+
+A quad tree could be used to make a speed up for finding the minimum n_ij in step 1, but was not implementet in our version of Saitou and Nei's neighbor-joining algorithm.  
+
+
+
+
+#A description of the machine that we have used to perform the experiments.
+
+CPU = i7-7700HQ
+RAM = 15.6 GiB
+OS = LINUX
+
+
+#Experiments
+
+We compared the performance of our program against QuickTree and RapidNJ in the following way:
+
+The archive  distance_matrices.zip contains 14 distance matrices (in phylip-format) ranging in size from 89 to 1849 species. For each distance matrix, we did the following:
+
+- Measured the time it took to construct the corresponding NJ tree using QuickTree, RapidNJ, and our program.
+
+- Computed the RF-distances (using our implementation of rfdist from project 4) between the trees produced by QuickTree, RapidNJ, and our program.
+
+A table summarizing the results of our experiment can be seen below. The table is organzied in such a way, that for each of the 14 distance matrices in distance_matrices.zip, the following were calculated, so that sentence below corresponds to the column number in the table:
+
+1.Running time of QuickTree.
+
+2.Running time of RapidNJ.
+
+3.Running time of your program.
+
+4.The speed-up achieved by your program relative to QuickTree, i.e. "Running time of QuickTree" / "Running time of your program".
+
+5.The speed-up achieved by your program nj relative to RapidNJ, i.e. "Running time of RapidNJ" / "Running time of your program".
+
+6.The RF-distance (as computed by your program rfdist from project 4) between the tree produced by QuickTree and the tree produced by your 
+program.
+
+7.The RF-distance (as computed by your program rfdist from project 4) between the tree produced by RapidNJ and the tree produced by your program.
+
+8.The RF-distance (as computed by your program rfdist from project 4) between the tree produced by RapidNJ and the tree produced by QuickTree.
+
+
+
+A bash script was written that measures the time consumption for our algorithm, QuickTree and RapidNJ. This bash script iterates through  the 14 distance matrices(each with increasing number of taxa) and computes the corresponding tree. Each iteration is measured in time and and the bash script returns the time corresponding to how long it took to build the tree from distance matrix for the given size of the matrix (n). 
+
+
+```{r Measuring the time,eval=FALSE}
+
+    #THIS IS THE TIME MEASUREMENTS FROM PROJECT4 <---------!
+
+n_and_time <- c(8, 0.21, 18, 0.18, 28, 0.17, 38, 0.17, 48, 0.18, 58, 0.22, 68, 0.30, 78, 0.19, 88, 0.20, 98, 0.23, 108, 0.21, 118, 0.20, 128, 0.24, 138, 0.22, 148, 0.22, 158, 0.26, 168, 0.27, 178, 0.29, 188, 0.23, 198, 0.27, 208, 0.26, 218, 0.29, 228, 0.27, 238, 0.30, 248, 0.27, 258, 0.25, 268, 0.29, 278, 0.28, 288, 0.30, 298, 0.28, 308, 0.29, 318, 0.36, 328, 0.34, 338, 0.31, 348, 0.36, 358, 0.33, 368, 0.34, 378, 0.35)
+n <- n_and_time[c(T, F)]
+time <- n_and_time[c(F, T)]
+
+timings <- data.frame(n,time)
+
+
+time_plot <- ggplot(data=timings)+
+  geom_point(aes(x=n,y=time/n))+
+  geom_line(aes(x=n,y=time/n))+
+  ggtitle("Rfdist time complexity")+
+  ylab("Seconds/n")
+
+time_plot
+
+
+
+
+```
+
+Our implementation of Saitou and Nei's neighbor-joining algorithm should be running in O(n^3) time. 
+
+This fits with what we observe from the plot above as it seems to stabilize around ??? #<----- ADD CONCLUSION ABOUT PLOT HERE  

@@ -68,20 +68,20 @@ class NJtree(object):
 
         if self.taxa_names[i] in self.clades and self.taxa_names[j] in self.clades:
 
-            self.clades[self.taxa_names[i] + self.taxa_names[j]] = "(" + self.clades[self.taxa_names[i]] + "):" + str(
-                w_i) + "(" + self.clades[self.taxa_names[j]] + "):" + str(w_j)
+            self.clades[self.taxa_names[i] + self.taxa_names[j]] = "(" + self.clades[self.taxa_names[i]] + ":" + str(
+                w_i) + "," + self.clades[self.taxa_names[j]] + "):" + str(w_j)
             del self.clades[self.taxa_names[i]]
             del self.clades[self.taxa_names[j]]
 
         elif self.taxa_names[i] in self.clades:
 
-            self.clades[self.taxa_names[i] + self.taxa_names[j]] = "(" + self.clades[self.taxa_names[i]] + "):" + str(
-                w_i) + leave_2 + ")"
+            self.clades[self.taxa_names[i] + self.taxa_names[j]] = "(" + self.clades[self.taxa_names[i]] + ":" + str(
+                w_i) + "," + leave_2 + ")"
             del self.clades[self.taxa_names[i]]
 
         elif self.taxa_names[j] in self.clades:
 
-            self.clades[self.taxa_names[i] + self.taxa_names[j]] = "(" + self.clades[self.taxa_names[j]] + "):" + str(
+            self.clades[self.taxa_names[i] + self.taxa_names[j]] = "(" + self.clades[self.taxa_names[j]] + ":" + str(
                 w_j) + "," + leave_1 + ")"
             del self.clades[self.taxa_names[j]]
 
