@@ -74,7 +74,7 @@ n iterations each taking:
 
 - Computing the matrix $N$ takes $O(n^2)$ time.
 
-- Finding the minimum $n_{ij}$ takes O(n^2) time.
+- Finding the minimum $n_{ij}$ takes $O(n^2)$ time.
 
 #### Step 2:
 
