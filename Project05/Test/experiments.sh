@@ -10,7 +10,7 @@ do
     # echo $filename
 
     # time quicktree
-    time_QT="$( TIMEFORMAT='%3R';time (../Software/quicktree_1.1/bin/quicktree $dist_Tree > Trees/quicktree.newick) 2>&1 1>/dev/null)"
+    time_QT="$( TIMEFORMAT='%3R';time (../Software/quicktree_1.1/bin/quicktree -in m $dist_Tree > Trees/quicktree.newick) 2>&1 1>/dev/null)"
 
     # time Neighbor-joining # Note: it's in miliseconds
     start=$(($(date +%s%N)/1000000))
